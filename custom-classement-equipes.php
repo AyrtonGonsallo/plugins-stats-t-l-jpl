@@ -94,6 +94,8 @@ $results=array();
 		$winner= get_field('les_combat')[0]['equipe_gagnante'];
         $ippons_equ1=0;
 		$ippons_equ2=0;
+        $equipe1 = get_field('equipe_1',$rencontre->ID)[0];
+        $equipe2 = get_field('equipe_2',$rencontre->ID)[0];
 		if($matchs_liste[0]['combats'][0]){
 
 			//prettyPrint(get_field('les_combat')[0]['combats'][0]);exit(-1); 
