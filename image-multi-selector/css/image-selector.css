@@ -1,0 +1,93 @@
+.image-container {
+    display: inline-block;
+    margin: 10px;
+    border: 1px solid #ddd;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.image-container.selected {
+    border-color: #0073aa;
+    background-color: #f0f8ff;
+}
+.pagination {
+    margin: 20px 0;
+}
+
+.pagination a,
+.pagination strong {
+    margin: 0 5px;
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.pagination a:hover {
+    background-color: #0073aa;
+    color: #fff;
+}
+
+.pagination strong {
+    background-color: #0073aa;
+    color: #fff;
+}
+/* Style de la galerie d'images */
+.image-container {
+    display: inline-block;
+    margin: 10px;
+    position: relative;
+}
+
+.lightbox-trigger {
+    cursor: pointer; /* Montre que l'image est cliquable */
+}
+
+/* Lightbox CSS */
+.lightbox {
+    display: none; /* Cachée par défaut */
+    position: fixed; 
+    z-index: 1000; /* Place la lightbox au-dessus de tout */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Fond sombre */
+    justify-content: center;
+    align-items: center;
+}
+
+.lightbox-content {
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+h3{
+    color: #060e95 !important;
+    font-weight: 900;
+}
+#submit-selected-images{
+    background-color: #060e95!important;
+    color: #ffffff !important;
+    font-weight: 600;
+    padding: 0 12px;
+    cursor: pointer;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 3px;
+    margin: 10px 0px;
+    min-height: 32px;
+}
+#submit-selected-images:hover{
+    background: #000 !important;
+    border-color: #000 !important;
+}

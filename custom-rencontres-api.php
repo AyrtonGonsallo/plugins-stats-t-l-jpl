@@ -12,7 +12,7 @@ $steps=array("FINAL FOUR","QUARTS DE FINALE C & D","QUARTS DE FINALE A & B","Pou
 $results=array();
 
 
-    function get_rencontres_data( $saison_value){
+    function get_rencontres_data( $saison_value,$journee){
         setlocale(LC_ALL, 'fr_FR.UTF8', 'fr_FR','fr','fr','fra','fr_FR@euro');
 
         $args = array(
@@ -20,9 +20,15 @@ $results=array();
             'posts_per_page' => -1,
             'meta_key' => 'date_de_debut',
             'orderby' => 'meta_value_num',
-            'order' => 'DESC',
+            'order' => 'ASC',
             'meta_query'     => 
             array(  
+                'relation' => 'AND', // Ajout de la relation pour combiner les conditions
+                array(
+                    'key'     => 'journee',
+                    'compare' => 'LIKE',
+                    'value'   => $journee,
+                ),
                 array(
                     'key'        => 'saisons',
                     'compare'    => 'LIKE',
@@ -34,7 +40,7 @@ $results=array();
         
         //prettyPrint($rencontres->posts);exit(-1);
         foreach($rencontres->posts as $rencontre){
-            $phase=get_field("phase",$rencontre->ID)[0];
+            $phase=get_field("niveau",$rencontre->ID);
             
             $matchs_liste=get_field('les_combat',$rencontre->ID);
             if($matchs_liste){
@@ -57,7 +63,7 @@ $results=array();
             }
         }
         foreach($rencontres->posts as $rencontre){
-            $phase=get_field("phase",$rencontre->ID)[0];
+            $phase=get_field("niveau",$rencontre->ID);
             $equipe1 = get_field('equipe_1',$rencontre->ID)[0];
             $equipe2 = get_field('equipe_2',$rencontre->ID)[0];
             $video = get_field( "video_live",$rencontre->ID);
@@ -79,15 +85,19 @@ $results=array();
             $statut=get_field('statut',$rencontre->ID)['label'];
             
             $matchs_liste=get_field('les_combat',$rencontre->ID);
-            $titre=get_the_title($rencontre->ID);
+            $titre=(get_field('intitule',$rencontre->ID)?get_field('intitule',$rencontre->ID):get_the_title($rencontre->ID));
+            // Remplacer "&#8211;" ou le tiret long "–" dans le titre
+            $titre = str_replace('&#8211;', '', $titre);
+            $titre = str_replace('–', '', $titre); // Cas du tiret long directement dans le titre
             $results['total'][$rencontre->ID][0]["id"] = $rencontre->ID;
             $results['total'][$rencontre->ID][0]["title"] = $titre;
             $results['total'][$rencontre->ID][0]["lieu_rencontre"] = $lieu_rencontre;
+            $results['total'][$rencontre->ID][0]["date_timestamp"] = $timestamp;
             $results['total'][$rencontre->ID][0]["date_de_debut"] = $date_de_debut;
             $results['total'][$rencontre->ID][0]["full_date_de_debut"] = $full_date_de_debut;
             $results['total'][$rencontre->ID][0]["heure_de_debut"] = $heure_de_debut;
             $results['total'][$rencontre->ID][0]["statut"] = $statut;
-            $results['total'][$rencontre->ID][0]["phase"] = $phase->post_title;
+            $results['total'][$rencontre->ID][0]["phase"] = $phase;
             $results['total'][$rencontre->ID][0]["journee"] =$journee;
             $results['total'][$rencontre->ID][0]["equipe_1"] = get_the_title($equipe1->ID);
             $results['total'][$rencontre->ID][0]["equipe_2"] = get_the_title($equipe2->ID);
@@ -148,10 +158,53 @@ $results=array();
     
 
 
-    function get_rencontres_plugin( $data ) {
-        $last_season_value = "2023-2024";
+    function get_current_rencontres_plugin( $data ) {
+        $last_season_value = "2024-2025";
         
-        $class_rencontres = get_rencontres_data( $last_season_value )['total'];
+        $class_rencontres = get_rencontres_data( $last_season_value,"Journée 1" )['total'];
+        $response = array();
+    
+        foreach ( $class_rencontres as $d ) {
+            $fields = get_fields( $d[0]['id'] ?? null); // Handle potential undefined 'rencontre_id'
+        
+            $response[] = array(
+                'id' => $d[0]['id'] ?? null,
+                'title' => $d[0]['title'] ?? '',
+                'lieu_rencontre' => $d[0]['lieu_rencontre'] ?? '',
+                'date_de_debut' => $d[0]['date_de_debut'] ?? '',
+                'full_date_de_debut' => $d[0]['full_date_de_debut'] ?? '',
+                'heure_de_debut' => $d[0]['heure_de_debut'] ?? '',
+                'statut' => $d[0]['statut'] ?? '',
+                'phase' => $d[0]['phase'] ?? '',
+                'journee' => $d[0]['journee'] ?? '',
+                'duree_combat' => $d[0]['duree_combat'] ?? '',
+                'equipe_1' => $d[0]['equipe_1'] ?? "",
+                'equipe_2' => $d[0]['equipe_2'] ?? "",
+                'abreviation_equipe_1' => $d[0]['abreviation_1'] ?? "",
+                'abreviation_equipe_2' => $d[0]['abreviation_2'] ?? "",
+                'logo_principal_equipe_1' => $d[0]['logo_principal_1'] ?? "",
+                'logo_principal_equipe_2' => $d[0]['logo_principal_2'] ?? "",
+                'logo_circle_equipe_1' => $d[0]['logo_circle_1'] ?? "",
+                'logo_circle_equipe_2' => $d[0]['logo_circle_2'] ?? "",
+                'logo_miniature_equipe_1' => $d[0]['logo_miniature_1'] ?? "",
+                'logo_miniature_equipe_2' => $d[0]['logo_miniature_2'] ?? "",
+                'pts_e1' => $d[0]['pts_e1'] ?? 0,
+                'pts_e2' => $d[0]['pts_e2'] ?? 0,
+                'score_eq_1' => $d[0]['ncge1'] ?? 0,
+                'score_eq_2' => $d[0]['ncge2'] ?? 0,
+                'combats' => $d[0]['combats'] ?? '',
+                
+            );
+        }
+        wp_send_json($response, 200, JSON_UNESCAPED_UNICODE);
+
+    }
+
+
+    function get_next_rencontres_plugin( $data ) {
+        $last_season_value = "2024-2025";
+        
+        $class_rencontres = get_rencontres_data( $last_season_value,"Journée 2" )['total'];
         $response = array();
     
         foreach ( $class_rencontres as $d ) {
@@ -200,7 +253,57 @@ $results=array();
             return $a['wazaris_marqués'] - $b['wazaris_marqués'];
         });*/
     
-        return new WP_REST_Response( $response, 200 );
+        wp_send_json($response, 200, JSON_UNESCAPED_UNICODE);
+    }
+
+    function get_rencontres_plugin( $data ) {
+        $last_season_value = "2024-2025";
+        
+        $class_rencontres = get_rencontres_data( $last_season_value,"" )['total'];
+        $response = array();
+    
+        foreach ( $class_rencontres as $d ) {
+            $fields = get_fields( $d[0]['id'] ?? null); // Handle potential undefined 'rencontre_id'
+        
+            $response[] = array(
+                'id' => $d[0]['id'] ?? null,
+                'title' => ($d[0]['title']) ?? '',
+                'lieu_rencontre' => $d[0]['lieu_rencontre'] ?? '',
+                'date_de_debut' => $d[0]['date_de_debut'] ?? '',
+                'date_timestamp' => $d[0]['date_timestamp'] ?? '',
+                'full_date_de_debut' => $d[0]['full_date_de_debut'] ?? '',
+                'heure_de_debut' => $d[0]['heure_de_debut'] ?? '',
+                'statut' => $d[0]['statut'] ?? '',
+                'phase' => $d[0]['phase'] ?? '',
+                'journee' => $d[0]['journee'] ?? '',
+                'duree_combat' => $d[0]['duree_combat'] ?? '',
+                'equipe_1' => $d[0]['equipe_1'] ?? "",
+                'equipe_2' => $d[0]['equipe_2'] ?? "",
+                'abreviation_equipe_1' => $d[0]['abreviation_1'] ?? "",
+                'abreviation_equipe_2' => $d[0]['abreviation_2'] ?? "",
+                'logo_principal_equipe_1' => $d[0]['logo_principal_1'] ?? "",
+                'logo_principal_equipe_2' => $d[0]['logo_principal_2'] ?? "",
+                'logo_circle_equipe_1' => $d[0]['logo_circle_1'] ?? "",
+                'logo_circle_equipe_2' => $d[0]['logo_circle_2'] ?? "",
+                'logo_miniature_equipe_1' => $d[0]['logo_miniature_1'] ?? "",
+                'logo_miniature_equipe_2' => $d[0]['logo_miniature_2'] ?? "",
+                'pts_e1' => $d[0]['pts_e1'] ?? 0,
+                'pts_e2' => $d[0]['pts_e2'] ?? 0,
+                'score_eq_1' => $d[0]['ncge1'] ?? 0,
+                'score_eq_2' => $d[0]['ncge2'] ?? 0,
+                'combats' => $d[0]['combats'] ?? '',
+                
+            );
+        }
+       
+        // Sort by multiple fields: points_individuels_rencontre (desc), ippons_marqués 
+       usort($response, function ($a, $b) {
+            
+            // If ippons_marqués are equal, compare by wazaris_marqués (asc)
+            return $a['date_timestamp'] - $b['date_timestamp'];
+        });
+    
+        wp_send_json($response, 200, JSON_UNESCAPED_UNICODE);
     }
     
 
@@ -210,6 +313,22 @@ $results=array();
 add_action( 'rest_api_init', function () {
     register_rest_route(
         'custom/v2',
+        '/rencontres_suivantes',
+        array(
+            'methods' => 'GET',
+            'callback' => 'get_next_rencontres_plugin',
+        )
+    );
+    register_rest_route(
+        'custom/v2',
+        '/rencontres_actuelles',
+        array(
+            'methods' => 'GET',
+            'callback' => 'get_current_rencontres_plugin',
+        )
+    );
+    register_rest_route(
+        'custom/v2',
         '/rencontres',
         array(
             'methods' => 'GET',
@@ -217,3 +336,5 @@ add_action( 'rest_api_init', function () {
         )
     );
 });
+
+

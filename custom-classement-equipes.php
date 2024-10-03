@@ -46,7 +46,7 @@ $results=array();
 
 		$matchs_liste=get_field('les_combat',$rencontre->ID);
 
-		if($matchs_liste){
+		if($matchs_liste[0]['combats']){
 
 			//prettyPrint(get_field('les_combat')[0]['combats'][0]);exit(-1); 
 			//echo sizeof($matchs_liste).' combats<br>';
@@ -66,7 +66,35 @@ $results=array();
 					$equipe1=get_field( 'equipe_judoka',$judoka1->ID )[0];
 
 					$equipe2=get_field( 'equipe_judoka',$judoka2->ID )[0];
-                    $results['total'][$equipe1->post_title] = [
+					$equipes_par_saisons1 =get_field('equipes_par_saisons',$judoka1->ID);
+					$equipes_par_saisons2 =get_field('equipes_par_saisons',$judoka2->ID);
+					//var_dump($equipes_par_saisons);
+					if ($equipes_par_saisons1) {
+						foreach ($equipes_par_saisons1 as $equipe11) {
+							// Obtenir et afficher le titre de l'équipe
+							if (isset($equipe11['equipe_judoka']) && isset($equipe11['saisons']) ) {
+								//var_dump($equipe1['saisons'][0]);
+								
+								if( $equipe11['saisons']== $saison_value){
+									$equipe1 = $equipe11['equipe_judoka'][0];
+								}
+							}
+						}
+					}
+					if ($equipes_par_saisons2) {
+						foreach ($equipes_par_saisons2 as $equipe21) {
+							// Obtenir et afficher le titre de l'équipe
+							if (isset($equipe21['equipe_judoka']) && isset($equipe21['saisons']) ) {
+								//var_dump($equipe1['saisons'][0]);
+								
+								if( $equipe21['saisons']== $saison_value){
+									$equipe2 = $equipe21['equipe_judoka'][0];
+								}
+							}
+						}
+					}
+										
+					$results['total'][$equipe1->post_title] = [
                         [
                             "nom" => $equipe1->post_title,
                             "combats_individuels" => [], // Initialize as an empty array
@@ -82,6 +110,36 @@ $results=array();
 
 			}
 
+		}else{
+			$equipe1 = get_field('equipe_1',$rencontre->ID)[0];
+        	$equipe2 = get_field('equipe_2',$rencontre->ID)[0];
+			$results['total'][$equipe1->post_title] = [
+				[
+					"nom" => $equipe1->post_title,
+					"titre" => $equipe1->post_title,
+					"id_ffjda" => get_field('id_ffjda', $equipe1->ID),
+					"abreviation" => get_field('abreviation', $equipe1->ID),
+					"logo_principal" => get_field('logo_principal', $equipe1->ID),
+					"logo_circle" => get_field('logo_circle', $equipe1->ID),
+					"logo_miniature" => get_field('logo_miniature', $equipe1->ID),
+					"niveau" =>get_field("niveau",$rencontre->ID),
+					"combats_individuels" => [], // Initialize as an empty array
+
+				]
+			];
+			$results['total'][$equipe2->post_title] = [
+				[
+					"nom" => $equipe2->post_title,
+					"titre" => $equipe2->post_title,
+					"id_ffjda" => get_field('id_ffjda', $equipe2->ID),
+					"abreviation" => get_field('abreviation', $equipe2->ID),
+					"logo_principal" => get_field('logo_principal', $equipe2->ID),
+					"logo_circle" => get_field('logo_circle', $equipe2->ID),
+					"logo_miniature" => get_field('logo_miniature', $equipe2->ID),
+					"niveau" =>get_field("niveau",$rencontre->ID),
+					"combats_individuels" => [], // Initialize as an empty array
+				]
+			];
 		}
 
 	}
@@ -91,31 +149,32 @@ $results=array();
 		$niveau=get_field("niveau",$rencontre->ID);
 		$mode_de_calcul_classement=get_field("mode_de_calcul_classement",$rencontre->ID);
 		$matchs_liste=get_field('les_combat',$rencontre->ID);
-		$winner= get_field('les_combat')[0]['equipe_gagnante'];
+		$winner= get_field('les_combat',$rencontre->ID)[0]['equipe_gagnante'];
         $ippons_equ1=0;
 		$ippons_equ2=0;
         $equipe1 = get_field('equipe_1',$rencontre->ID)[0];
         $equipe2 = get_field('equipe_2',$rencontre->ID)[0];
-		if($matchs_liste[0]['combats'][0]){
-
-			//prettyPrint(get_field('les_combat')[0]['combats'][0]);exit(-1); 
-
-			//echo sizeof($matchs_liste).' combats<br>';
-
+		
+		if($matchs_liste[0]['combats']){
 			$results["total"][$equipe1->post_title][0]["points_marqués"]+=intval($matchs_liste[0]['points_equipe_1']);
 			$results["total"][$equipe2->post_title][0]["points_marqués"]+=intval($matchs_liste[0]['points_equipe_2']);
 			$results["total"][$equipe1->post_title][0]["titre"]=$equipe1->post_title;
 			$results["total"][$equipe2->post_title][0]["titre"]=$equipe2->post_title;
-            $results["total"][$equipe1->post_title][0]["id_ffjda"]= get_field('id_ffjda',$equipe1->ID);
+			$results["total"][$equipe1->post_title][0]["id_ffjda"]= get_field('id_ffjda',$equipe1->ID);
 			$results["total"][$equipe2->post_title][0]["id_ffjda"]= get_field('id_ffjda',$equipe2->ID);
-            $results["total"][$equipe1->post_title][0]["abreviation"]= get_field('abreviation',$equipe1->ID);
+			$results["total"][$equipe1->post_title][0]["abreviation"]= get_field('abreviation',$equipe1->ID);
 			$results["total"][$equipe2->post_title][0]["abreviation"]= get_field('abreviation',$equipe2->ID);
-            $results["total"][$equipe1->post_title][0]["logo_principal"]= get_field('logo_principal',$equipe1->ID);
+			$results["total"][$equipe1->post_title][0]["logo_principal"]= get_field('logo_principal',$equipe1->ID);
 			$results["total"][$equipe2->post_title][0]["logo_principal"]= get_field('logo_principal',$equipe2->ID);
-            $results["total"][$equipe1->post_title][0]["logo_circle"]= get_field('logo_circle',$equipe1->ID);
+			$results["total"][$equipe1->post_title][0]["logo_circle"]= get_field('logo_circle',$equipe1->ID);
 			$results["total"][$equipe2->post_title][0]["logo_circle"]= get_field('logo_circle',$equipe2->ID);
-            $results["total"][$equipe1->post_title][0]["logo_miniature"]= get_field('logo_miniature',$equipe1->ID);
+			$results["total"][$equipe1->post_title][0]["logo_miniature"]= get_field('logo_miniature',$equipe1->ID);
 			$results["total"][$equipe2->post_title][0]["logo_miniature"]= get_field('logo_miniature',$equipe2->ID);
+				
+			//prettyPrint(get_field('les_combat')[0]['combats'][0]);exit(-1); 
+
+			//echo sizeof($matchs_liste).' combats<br>';
+
 			
 			foreach($matchs_liste as $matchs){
 
@@ -136,6 +195,33 @@ $results=array();
 					$equipe1=get_field( 'equipe_judoka',$judoka1->ID )[0];
 
 					$equipe2=get_field( 'equipe_judoka',$judoka2->ID )[0];
+					$equipes_par_saisons1 =get_field('equipes_par_saisons',$judoka1->ID);
+					$equipes_par_saisons2 =get_field('equipes_par_saisons',$judoka2->ID);
+					//var_dump($equipes_par_saisons);
+					if ($equipes_par_saisons1) {
+						foreach ($equipes_par_saisons1 as $equipe11) {
+							// Obtenir et afficher le titre de l'équipe
+							if (isset($equipe11['equipe_judoka']) && isset($equipe11['saisons']) ) {
+								//var_dump($equipe1['saisons'][0]);
+								
+								if( $equipe11['saisons']== $saison_value){
+									$equipe1 = $equipe11['equipe_judoka'][0];
+								}
+							}
+						}
+					}
+					if ($equipes_par_saisons2) {
+						foreach ($equipes_par_saisons2 as $equipe21) {
+							// Obtenir et afficher le titre de l'équipe
+							if (isset($equipe21['equipe_judoka']) && isset($equipe21['saisons']) ) {
+								//var_dump($equipe1['saisons'][0]);
+								
+								if( $equipe21['saisons']== $saison_value){
+									$equipe2 = $equipe21['equipe_judoka'][0];
+								}
+							}
+						}
+					}
                     $results['total'][$equipe1->post_title][0]["combats_individuels"][] = [
                         "RencontreID" => $rencontre->ID,
                         "Combat" => $judoka1->post_title." (".$equipe1->post_title.") vs ".$judoka2->post_title." (".$equipe2->post_title.")",
@@ -237,28 +323,30 @@ $results=array();
 				
 			}
 
-		}
-        $results["total"][$equipe1->post_title][0]["matchs_joues"]+=1;
-        $results["total"][$equipe2->post_title][0]["matchs_joues"]+=1;
-		if ($winner=='équipe 1'){
 
-			$results["total"][$equipe1->post_title][0]["victoires"]+=1;
-			$results["total"][$equipe2->post_title][0]["defaites"]+=1;
-			$results["total"][$equipe1->post_title][0]["points"]+=3;
-			$results["total"][$equipe2->post_title][0]["points"]+=0;
+			$results["total"][$equipe1->post_title][0]["matchs_joues"]+=1;
+			$results["total"][$equipe2->post_title][0]["matchs_joues"]+=1;
+			if ($winner=='équipe 1'){
+	
+				$results["total"][$equipe1->post_title][0]["victoires"]+=1;
+				$results["total"][$equipe2->post_title][0]["defaites"]+=1;
+				$results["total"][$equipe1->post_title][0]["points"]+=3;
+				$results["total"][$equipe2->post_title][0]["points"]+=0;
+			}
+			if ($winner=='inconnue'){
+				$results["total"][$equipe1->post_title][0]["nuls"]+=1;
+				$results["total"][$equipe2->post_title][0]["nuls"]+=1;
+				$results["total"][$equipe1->post_title][0]["points"]+=1;
+				$results["total"][$equipe2->post_title][0]["points"]+=1;
+			}
+			if ($winner=='équipe 2'){
+				$results["total"][$equipe1->post_title][0]["defaites"]+=1;
+				$results["total"][$equipe2->post_title][0]["victoires"]+=1;
+				$results["total"][$equipe1->post_title][0]["points"]+=0;
+				$results["total"][$equipe2->post_title][0]["points"]+=3;
+			}
 		}
-		if ($winner=='inconnue'){
-			$results["total"][$equipe1->post_title][0]["nuls"]+=1;
-			$results["total"][$equipe2->post_title][0]["nuls"]+=1;
-			$results["total"][$equipe1->post_title][0]["points"]+=1;
-			$results["total"][$equipe2->post_title][0]["points"]+=1;
-		}
-		if ($winner=='équipe 2'){
-			$results["total"][$equipe1->post_title][0]["defaites"]+=1;
-			$results["total"][$equipe2->post_title][0]["victoires"]+=1;
-			$results["total"][$equipe1->post_title][0]["points"]+=0;
-			$results["total"][$equipe2->post_title][0]["points"]+=3;
-		}
+        
 
 
 
@@ -275,7 +363,7 @@ $sorted_result_ids=array();
 			array_push($sorted_result_ids,array("id"=>$result_by_equipe_data["nom"],"step"=>$result_by_equipe_data["step"],"points"=>$result_by_equipe_data["points"],"points_marqués"=>$result_by_equipe_data["points_marqués"],"ippons_marqués"=>$result_by_equipe_data["ippons_marqués"]));
 		}
 	}
-	$sorted_result_ids2=array_msort2($sorted_result_ids,array('points'=>SORT_DESC,'points_marqués'=>SORT_DESC,'ippons_marqués'=>SORT_DESC));
+	$sorted_result_ids2=array_msort2($sorted_result_ids,array('points'=>SORT_DESC,'points_marqués'=>SORT_DESC,'ippons_marqués'=>SORT_DESC,'id'=>SORT_ASC));
 	
 	//prettyPrint($sorted_result_ids);
 	//prettyPrint($sorted_result_ids2);
@@ -304,7 +392,7 @@ $sorted_result_ids=array();
 
 
     function get_classement_equipes( $data ) {
-        $last_season_value = "2023-2024";
+        $last_season_value = "2024-2025";
         
         $class_classement_equipes = get_classement_equipes_plugin( $last_season_value )['total'];
         $response = array();
@@ -349,7 +437,7 @@ $sorted_result_ids=array();
             return $a['points'] - $b['points'];
         });
     
-        return new WP_REST_Response( $response, 200 );
+        wp_send_json($response, 200, JSON_UNESCAPED_UNICODE);
     }
     
 

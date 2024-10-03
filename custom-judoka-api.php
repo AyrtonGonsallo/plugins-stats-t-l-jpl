@@ -56,10 +56,10 @@ function array_msort2($array, $cols)
         
         //prettyPrint($rencontres->posts);exit(-1);
         foreach($rencontres->posts as $rencontre){
-            $phase=get_field("phase",$rencontre->ID)[0];
+            //$phase=get_field("phase",$rencontre->ID)[0];
             
             $matchs_liste=get_field('les_combat',$rencontre->ID);
-            if($matchs_liste){
+            if($matchs_liste[0]['combats']){
                 //prettyPrint(get_field('les_combat')[0]['combats'][0]);exit(-1); 
                 
                 //echo sizeof($matchs_liste).' combats<br>';
@@ -134,11 +134,11 @@ function array_msort2($array, $cols)
             }
         }
         foreach($rencontres->posts as $rencontre){
-            $phase=get_field("phase",$rencontre->ID)[0];
+            //$phase=get_field("phase",$rencontre->ID)[0];
             $mode_de_calcul_classement=get_field("mode_de_calcul_classement",$rencontre->ID);
     
             $matchs_liste=get_field('les_combat',$rencontre->ID);
-            if($matchs_liste){
+            if($matchs_liste[0]['combats']){
                 //prettyPrint(get_field('les_combat')[0]['combats'][0]);exit(-1); 
                 
                 //echo sizeof($matchs_liste).' combats<br>';
@@ -358,11 +358,11 @@ function array_msort2($array, $cols)
         //exit(-1);
         
     
-        if(sizeof($results['total'])>1){
+        if($results && sizeof($results['total'])>1){
             
             return $results;
         }else{
-            $last_season_value="2023-2024";
+            $last_season_value="2024-2025";
             $args_judokas=array(
                 'post_type'=> 'judoka',
                 'posts_per_page' => -1,
@@ -401,9 +401,9 @@ function array_msort2($array, $cols)
                     foreach ($equipes_par_saisons as $eq) {
                         // Obtenir et afficher le titre de l'équipe
                         if (isset($eq['equipe_judoka']) && isset($eq['saisons']) ) {
-                            //var_dump($eq1['saisons'][0]);
+                            //var_dump($eq1['saisons'][0]);exit(-1);
                                 
-                                if( $eq['saisons'][0]== $last_season_value){
+                                if( $eq['saisons']== $last_season_value){
                                     $equipe = $eq['equipe_judoka'][0];
                                 }
                                 
@@ -414,6 +414,9 @@ function array_msort2($array, $cols)
                     }
                 }
                 $club=($equipe->post_title)?' ('.$equipe->post_title.') ':'';
+                $results2['total'][$judoka->post_title][0]["judoka_id"]=$judoka->ID;
+                $results2['total'][$judoka->post_title][0]["categorie_de_poids"]=get_field('categorie_de_poids',$judoka->ID);
+                $results2['total'][$judoka->post_title][0]["equipe"] =  $equipe->post_title;
                 $results2['total'][$judoka->post_title][0]["nom"]=get_field( 'prenom_judoka',$judoka->ID ).' '.get_field( 'nom_judoka',$judoka->ID ).''.$club;
                 $results2['total'][$judoka->post_title][0]["image"]=get_the_post_thumbnail_url($judoka->ID,'thumbnail')?get_the_post_thumbnail_url ($judoka->ID,'thumbnail'):'/wp-content/uploads/2023/09/profil.jpg';
                 $results2['total'][$judoka->post_title][0]["sexe"]=get_field('sexe',$judoka->ID);
@@ -439,7 +442,7 @@ function array_msort2($array, $cols)
 
 
     function get_stats_judokas( $data ) {
-        $last_season_value = "2023-2024";
+        $last_season_value = "2024-2025";
         
         $class_judokas = get_classement_plugin( $last_season_value )['total'];
         $response = array();
@@ -486,7 +489,7 @@ function array_msort2($array, $cols)
             return $a['wazaris_marqués'] - $b['wazaris_marqués'];
         });
     
-        return new WP_REST_Response( $response, 200 );
+        wp_send_json($response, 200, JSON_UNESCAPED_UNICODE);
     }
     
 
