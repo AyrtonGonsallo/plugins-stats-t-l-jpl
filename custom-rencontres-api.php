@@ -192,6 +192,7 @@ $results=array();
                 'pts_e2' => $d[0]['pts_e2'] ?? 0,
                 'score_eq_1' => $d[0]['ncge1'] ?? 0,
                 'score_eq_2' => $d[0]['ncge2'] ?? 0,
+                'equipe_gagnante' => $d[0]['equipe_gagnante'] ?? '',
                 'combats' => $d[0]['combats'] ?? '',
                 
             );
@@ -235,6 +236,7 @@ $results=array();
                 'pts_e2' => $d[0]['pts_e2'] ?? 0,
                 'score_eq_1' => $d[0]['ncge1'] ?? 0,
                 'score_eq_2' => $d[0]['ncge2'] ?? 0,
+                'equipe_gagnante' => $d[0]['equipe_gagnante'] ?? '',
                 'combats' => $d[0]['combats'] ?? '',
                 
             );
@@ -291,6 +293,7 @@ $results=array();
                 'pts_e2' => $d[0]['pts_e2'] ?? 0,
                 'score_eq_1' => $d[0]['ncge1'] ?? 0,
                 'score_eq_2' => $d[0]['ncge2'] ?? 0,
+                'equipe_gagnante' => $d[0]['equipe_gagnante'] ?? '',
                 'combats' => $d[0]['combats'] ?? '',
                 
             );

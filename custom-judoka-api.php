@@ -491,6 +491,54 @@ function array_msort2($array, $cols)
     
         wp_send_json($response, 200, JSON_UNESCAPED_UNICODE);
     }
+
+
+    function get_stats_judokas_marqueurs( $data ) {
+        $last_season_value = "2024-2025";
+        
+        $class_judokas =  array_slice(get_classement_plugin( $last_season_value )['total'],0,5);
+        $response = array();
+    
+        foreach ( $class_judokas as $d ) {
+            $fields = get_fields( $d[0]['judoka_id'] ?? null); // Handle potential undefined 'judoka_id'
+        
+            $response[] = array(
+                'id' => $d[0]['judoka_id'] ?? null,
+                'nom' => $d[0]['nom'] ?? '',
+                'equipe' => $d[0]['equipe'] ?? '',
+                'age' => $d[0]['age'] ?? 0,
+                'categorie_de_poids' => ($d[0]['categorie_de_poids'].' kg') ?? "",
+                'sexe' => $d[0]['sexe'] ?? '',
+                'image' => $d[0]['image'] ?? '',
+                'rencontres' => $d[0]['rencontres'] ?? null,
+                'nombre_de_rencontres' => $d[0]['nombre_de_rencontres'] ?? 0,
+                'rencontres_victoires' => $d[0]['victoires'] ?? 0,
+                'rencontres_defaites' => $d[0]['defaites'] ?? 0,
+                'rencontres_nuls' => $d[0]['nuls'] ?? 0,
+                'matchs_individuels_joués' => $d[0]['matchs_joués'] ?? 0,
+                'matchs_individuels_gagnés' => $d[0]['matchs_v'] ?? 0,
+                'matchs_individuels_perdus' => $d[0]['matchs_d'] ?? 0,
+                'matchs_individuels_nuls' => $d[0]['matchs_nuls'] ?? 0,
+                'points_equipe' => $d[0]['points'] ?? null,
+                'points_individuels_judoka' => $d[0]['points_judoka'] ?? 0,
+                'ippons_marqués' => $d[0]['ippons_marqués'] ?? 0,
+                'ippons_concédés' => $d[0]['ippons_concédés'] ?? 0,
+                'wazaris_marqués' => $d[0]['wazaris_marqués'] ?? 0,
+                'wazaris_concédés' => $d[0]['wazaris_concédés'] ?? 0,
+            );
+        }
+    
+        // Sort by multiple fields: points_individuels_judoka (desc), ippons_marqués 
+        usort($response, function ($a, $b) {
+            if ($a['ippons_marqués'] != $b['ippons_marqués']) {
+                return $b['ippons_marqués'] - $a['ippons_marqués'];
+            }
+            // If ippons_marqués are equal, compare by wazaris_marqués (asc)
+            return 0;
+        });
+    
+        wp_send_json($response, 200, JSON_UNESCAPED_UNICODE);
+    }
     
 
 
@@ -503,6 +551,15 @@ add_action( 'rest_api_init', function () {
         array(
             'methods' => 'GET',
             'callback' => 'get_stats_judokas',
+        )
+    );
+
+    register_rest_route(
+        'custom/v2',
+        '/judokas_marqueurs',
+        array(
+            'methods' => 'GET',
+            'callback' => 'get_stats_judokas_marqueurs',
         )
     );
 });
