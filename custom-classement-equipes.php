@@ -73,7 +73,7 @@ $results=array();
 						foreach ($equipes_par_saisons1 as $equipe11) {
 							// Obtenir et afficher le titre de l'équipe
 							if (isset($equipe11['equipe_judoka']) && isset($equipe11['saisons']) ) {
-								//var_dump($equipe1['saisons'][0]);
+								//var_dump($equipe1['saisons']);
 								
 								if( $equipe11['saisons']== $saison_value){
 									$equipe1 = $equipe11['equipe_judoka'][0];
@@ -85,7 +85,7 @@ $results=array();
 						foreach ($equipes_par_saisons2 as $equipe21) {
 							// Obtenir et afficher le titre de l'équipe
 							if (isset($equipe21['equipe_judoka']) && isset($equipe21['saisons']) ) {
-								//var_dump($equipe1['saisons'][0]);
+								//var_dump($equipe1['saisons']);
 								
 								if( $equipe21['saisons']== $saison_value){
 									$equipe2 = $equipe21['equipe_judoka'][0];
@@ -202,7 +202,7 @@ $results=array();
 						foreach ($equipes_par_saisons1 as $equipe11) {
 							// Obtenir et afficher le titre de l'équipe
 							if (isset($equipe11['equipe_judoka']) && isset($equipe11['saisons']) ) {
-								//var_dump($equipe1['saisons'][0]);
+								//var_dump($equipe1['saisons']);
 								
 								if( $equipe11['saisons']== $saison_value){
 									$equipe1 = $equipe11['equipe_judoka'][0];
@@ -214,7 +214,7 @@ $results=array();
 						foreach ($equipes_par_saisons2 as $equipe21) {
 							// Obtenir et afficher le titre de l'équipe
 							if (isset($equipe21['equipe_judoka']) && isset($equipe21['saisons']) ) {
-								//var_dump($equipe1['saisons'][0]);
+								//var_dump($equipe1['saisons']);
 								
 								if( $equipe21['saisons']== $saison_value){
 									$equipe2 = $equipe21['equipe_judoka'][0];
@@ -369,12 +369,17 @@ $sorted_result_ids=array();
 	//prettyPrint($sorted_result_ids2);
 	//exit(-1);
 	$i=1;
+	$pts_prec=0;
 		foreach($sorted_result_ids2 as $s2){
 			
 				$results['total'][$s2["id"]][0]["rang"]=$i;
 				$sorted_results['total'][$s2["id"]]=$results['total'][$s2["id"]];
 				
+				if(($s2["points"]!=0) && ($s2["points"]!=$pts_prec)){
 					$i+=1;
+				}
+				$pts_prec=$s2["points"];
+					
 				
 				
 				
@@ -432,7 +437,7 @@ $sorted_result_ids=array();
                 return $a['rang'] - $b['rang'];
             }
             if ($a['titre'] != $b['titre']) {
-                return $b['titre'] - $a['titre'];
+                return strcmp($a['titre'], $b['titre']);
             }
             // If ippons_marqués are equal, compare by wazaris_marqués (asc)
             return $a['points'] - $b['points'];
@@ -445,7 +450,7 @@ $sorted_result_ids=array();
 	function get_classement_equipes_offensives( $data ) {
         $last_season_value = "2024-2025";
         
-        $class_classement_equipes = array_slice(get_classement_equipes_plugin( $last_season_value )['total'],0,5);
+        $class_classement_equipes = get_classement_equipes_plugin( $last_season_value )['total'];
         $response = array();
     
         foreach ( $class_classement_equipes as $d ) {
@@ -487,63 +492,15 @@ $sorted_result_ids=array();
 			if ($a['ippons_marqués'] != $b['ippons_marqués']) {
 				return $b['ippons_marqués'] - $a['ippons_marqués']; // Descending order
 			}
+			if ($a['titre'] != $b['titre']) {
+                return strcmp($a['titre'], $b['titre']);//ce sont des strings
+            }
 			return 0; // If points and ippons_marqués are equal
 		});
     
-        wp_send_json($response, 200, JSON_UNESCAPED_UNICODE);
+        wp_send_json(array_slice($response,0,5), 200, JSON_UNESCAPED_UNICODE);
     }
     
-	function get_classement_equipes_top_10( $data ) {
-        $last_season_value = "2024-2025";
-        
-		$class_classement_equipes = array_slice(get_classement_equipes_plugin( $last_season_value )['total'], 0, 10);
-        $response = array();
-    
-        foreach ( $class_classement_equipes as $d ) {
-            $fields = get_fields( $d[0]['id'] ?? null); // Handle potential undefined 'rencontre_id'
-        
-            $response[] = array(
-                'id_ffjda' => $d[0]['id_ffjda'] ?? null,
-                'titre' => $d[0]['titre'] ?? '',
-				'phase'=>'journée 1',
-                'abreviation' => $d[0]['abreviation'] ?? '',
-                'logo_miniature' => $d[0]['logo_miniature'] ?? '',
-                'logo_circle' => $d[0]['logo_circle'] ?? '',
-                'logo_principal' => $d[0]['logo_principal'] ?? '',
-                'niveau' => $d[0]['niveau'] ?? '',
-                'rang' => $d[0]['rang'] ?? '',
-                'points' => $d[0]['points'] ?? 0,
-                'bonus' => $d[0]['bonus'] ?? 0,
-                'matchs_joues' => $d[0]['matchs_joues'] ?? 0,
-                'victoires' => $d[0]['victoires'] ?? 0,
-                'nuls' => $d[0]['nuls'] ?? 0,
-                'defaites' => $d[0]['defaites'] ?? 0,
-                'ippons_marqués' => $d[0]['ippons_marqués'] ?? 0,
-                'ippons_concédés' => $d[0]['ippons_concédés'] ?? 0,
-                'wazaris_marqués' => $d[0]['wazaris_marqués'] ?? 0,
-                'wazaris_concédés' => $d[0]['wazaris_concédés'] ?? 0,
-                'points_marqués' => $d[0]['points_marqués'] ?? 0,
-                'combats_individuels' => $d[0]['combats_individuels'] ?? '',
-                
-            );
-        }
-        // Sort by multiple fields: points_individuels_rencontre (desc), ippons_marqués 
-        // Sort by multiple fields: points (desc), ippons_marqués (desc)
-		usort($response, function ($a, $b) {
-			// Compare by points (desc)
-			if ($a['points'] != $b['points']) {
-				return $b['points'] - $a['points']; // Descending order
-			}
-			// Compare by ippons_marqués (desc)
-			if ($a['ippons_marqués'] != $b['ippons_marqués']) {
-				return $b['ippons_marqués'] - $a['ippons_marqués']; // Descending order
-			}
-			return 0; // If points and ippons_marqués are equal
-		});
-    
-        wp_send_json($response, 200, JSON_UNESCAPED_UNICODE);
-    }
-
 
 
 add_action( 'rest_api_init', function () {
@@ -565,12 +522,4 @@ add_action( 'rest_api_init', function () {
         )
     );
 
-	register_rest_route(
-        'custom/v2',
-        '/top_10_equipes',
-        array(
-            'methods' => 'GET',
-            'callback' => 'get_classement_equipes_top_10',
-        )
-    );
 });

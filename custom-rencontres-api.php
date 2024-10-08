@@ -160,7 +160,7 @@ $results=array();
 
     function get_current_rencontres_plugin( $data ) {
         $last_season_value = "2024-2025";
-        
+        $now=date('Y/m/d H:i:s', strtotime('+3 hours'));
         $class_rencontres = get_rencontres_data( $last_season_value,"Journée 1" )['total'];
         $response = array();
     
@@ -204,8 +204,8 @@ $results=array();
 
     function get_next_rencontres_plugin( $data ) {
         $last_season_value = "2024-2025";
-        
-        $class_rencontres = get_rencontres_data( $last_season_value,"Journée 2" )['total'];
+        $now=date('Y/m/d H:i:s', strtotime('+3 hours'));
+        $class_rencontres = get_rencontres_data( $last_season_value,"Journée 2"  )['total'];
         $response = array();
     
         foreach ( $class_rencontres as $d ) {
@@ -260,8 +260,8 @@ $results=array();
 
     function get_rencontres_plugin( $data ) {
         $last_season_value = "2024-2025";
-        
-        $class_rencontres = get_rencontres_data( $last_season_value,"" )['total'];
+        $now=date('Y/m/d H:i:s',strtotime('-1 year'));
+        $class_rencontres = get_rencontres_data( $last_season_value,"")['total'];
         $response = array();
     
         foreach ( $class_rencontres as $d ) {

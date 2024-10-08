@@ -5,22 +5,28 @@
         $galerie_id = isset($_GET["galerie"]) ? $_GET["galerie"] : 0;
 
     ?>
-    <form id="search-form" method="GET" action="">
-        <input type="text" name="search_title" placeholder="Rechercher par titre" value="<?php echo isset($_GET['search_title']) ? esc_attr($_GET['search_title']) : ''; ?>" />
-        <input type="hidden" name="paged" value="<?php echo esc_attr($paged); ?>" />
-        <input type="hidden" name="galerie_id" value="<?php echo esc_attr($galerie_id); ?>" />
-        <input type="hidden" name="page" value="image-multi-selector" />
-        <button type="submit">Rechercher</button>
-    </form>
-
-   
-
+    
 
 
     <form id="image-selector-form" method="POST" action="">
          <!-- Ajout du formulaire pour sélectionner les judokas et la saison -->
+         <div class="image-jdk-form">
+         
+         <div class="image-flx-1">
+
+         <div class="image-recherche-form">
+    <form id="search-form" method="GET" action="" >
+        <input type="text" name="search_title" placeholder="Rechercher par titre" value="<?php echo isset($_GET['search_title']) ? esc_attr($_GET['search_title']) : ''; ?>" />
+        <input type="hidden" name="paged" value="<?php echo esc_attr($paged); ?>" />
+        <input type="hidden" name="galerie_id" value="<?php echo esc_attr($galerie_id); ?>" />
+        <input type="hidden" name="page" value="image-multi-selector" />
+        <button type="submit" class="rech-btn">Rechercher</button>
+    </form>
+    </div>
+       
+         </div>
          <div class="image-meta-form">
-            <div>Associer des judokas et une saison aux images</div>
+            <div class="images-meta-title">Associer des judokas et une saison aux images :</div>
 
             <?php
             // Liste des judokas
@@ -30,6 +36,7 @@
                 '2024-2025' => '2024-2025',
             );
             ?>
+            <div class="image-flx-forms">
             <div>
                 <!-- Champ pour sélectionner Judoka 1 -->
                 <label for="judoka1">Sélectionner Judoka 1 :</label>
@@ -59,15 +66,14 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div>
-                <button type="submit" id="submit-selected-images">Associer aux images sélectionnées</button>
             </div>
+            
+        </div>
         </div>
 
-
         <div class="select-actions">
-            <input type="checkbox" id="select-all" /> <label for="select-all">Tout choisir</label>
-            <input type="checkbox" id="deselect-all" /> <label for="deselect-all">Tout retirer</label>
+        <div class="col-1"> <input type="checkbox" id="select-all" /> <label for="select-all">Tout choisir</label></div> 
+        <div class="col-1"> <input type="checkbox" id="deselect-all" /> <label for="deselect-all">Tout retirer</label></div> 
         </div> 
 
         <?php
@@ -100,26 +106,50 @@
             
             foreach ($images as $image) {
                 $image_url = wp_get_attachment_url($image->ID);
-                
+                $img_j1_id=get_post_meta($image->ID, 'related_judoka_1', true);
+                $img_j2_id=get_post_meta($image->ID, 'related_judoka_2', true);
+                $img_saison=get_post_meta($image->ID, 'related_saison', true);
                 echo '<div class="image-container">';
-                echo '<label>';
-                echo '<input type="checkbox" class="image-checkbox" value="' . esc_attr($image->ID) . '" name="selected_images[]">';
-                echo '</label>';
-                echo '<img class="lightbox-trigger" width="100px" src="' . esc_url($image_url) . '" alt="' . esc_attr(get_the_title($image->ID)) . '">';
-
+                    echo '<label>';
+                    echo '<input type="checkbox" class="image-checkbox" value="' . esc_attr($image->ID) . '" name="selected_images[]">';
+                    echo '</label>';
+                    echo '<img class="lightbox-trigger" width="100px" src="' . esc_url($image_url) . '" alt="' . esc_attr(get_the_title($image->ID)) . '">';
+                    echo '<div>';
+                        if($img_j1_id){
+                            echo '<div>Judoka 1 : '.esc_html(get_the_title($img_j1_id)).'</div>'; // Récupère la valeur liée à 'related_judoka_1'
+                        }
+                        if($img_j2_id){
+                            echo '<div>Judoka 2 : '.esc_html(get_the_title($img_j2_id)).'</div>'; // Récupère la valeur liée à 'related_judoka_2'
+                        }
+                        if($img_saison){
+                            echo '<div>Saison : '.esc_html(($img_saison)).'</div>'; // Récupère la valeur liée à 'related_saison'
+                        }
+                    echo '</div>';
                 echo '</div>';
             }
         } else if ($images_galerie) {
              echo '<h3>'.$titre_galerie.'</h3>';
             foreach ($images_galerie as $image) {
                 $image_url = wp_get_attachment_url($image["ID"]);
-                
+                $img_j1_id=get_post_meta($image["ID"], 'related_judoka_1', true);
+                $img_j2_id=get_post_meta($image["ID"], 'related_judoka_2', true);
+                $img_saison=get_post_meta($image["ID"], 'related_saison', true);
                 echo '<div class="image-container">';
-                echo '<label>';
-                echo '<input type="checkbox" class="image-checkbox" value="' . esc_attr($image["ID"]) . '" name="selected_images[]">';
-                echo '</label>';
-                echo '<img class="lightbox-trigger" width="100px" src="' . esc_url($image_url) . '" alt="' . esc_attr(get_the_title($image->ID)) . '">';
-
+                    echo '<label>';
+                        echo '<input type="checkbox" class="image-checkbox" value="' . esc_attr($image["ID"]) . '" name="selected_images[]">';
+                    echo '</label>';
+                    echo '<img class="lightbox-trigger" width="100px" src="' . esc_url($image_url) . '" alt="' . esc_attr(get_the_title($image["ID"])) . '">';
+                    echo '<div>';
+                    if($img_j1_id){
+                        echo '<div>Judoka 1 : '.esc_html(get_the_title($img_j1_id)).'</div>'; // Récupère la valeur liée à 'related_judoka_1'
+                    }
+                    if($img_j2_id){
+                        echo '<div>Judoka 2 : '.esc_html(get_the_title($img_j2_id)).'</div>'; // Récupère la valeur liée à 'related_judoka_2'
+                    }
+                    if($img_saison){
+                        echo '<div>Saison : '.esc_html(($img_saison)).'</div>'; // Récupère la valeur liée à 'related_saison'
+                    }
+                    echo '</div>';
                 echo '</div>';
             }
         } 
@@ -127,23 +157,34 @@
             echo '<p>Aucune image trouvée.</p>';
         }
 
-        // Pagination
-        $total_images = count(get_posts(array(
-            'post_type' => 'attachment',
-            'post_mime_type' => 'image',
-            'numberposts' => -1,
-            's' => $search_title
-        )));
-        $total_pages = ceil($total_images / $posts_per_page);
+        if(!$galerie_id){
+            // Pagination
+            $total_images = count(get_posts(array(
+                'post_type' => 'attachment',
+                'post_mime_type' => 'image',
+                'numberposts' => -1,
+                's' => $search_title
+            )));
+            $total_pages = ceil($total_images / $posts_per_page);
 
-        echo '<div class="pagination">';
-        if ($paged > 1) {
-            echo '<a href="' . add_query_arg(array('paged' => $paged - 1, 'search_title' => $search_title)) . '">&laquo; Précédent</a>';
-        }
-        if ($paged < $total_pages) {
-            echo '<a href="' . add_query_arg(array('paged' => $paged + 1, 'search_title' => $search_title)) . '">Suivant &raquo;</a>';
-        }
-        echo '</div>';
+            echo '<div class="pagination">';
+            if ($paged > 1) {
+                echo '<a href="' . add_query_arg(array('paged' => $paged - 1, 'search_title' => $search_title)) . '">&laquo; Précédent</a>';
+            }
+            if ($paged < $total_pages) {
+                echo '<a href="' . add_query_arg(array('paged' => $paged + 1, 'search_title' => $search_title)) . '">Suivant &raquo;</a>';
+            }
+            
+                echo '<div class="btn-image-form-2">';
+                echo '<button type="submit" id="submit-selected-images">Valider</button>';
+                echo '</div>';
+            echo '</div>';
+        }else{ ?>
+            <div class="btn-image-form-2">
+                <button type="submit" id="submit-selected-images">Valider</button>
+            </div>
+        <?php }
+        
         ?>
 
        

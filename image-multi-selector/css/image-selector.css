@@ -75,7 +75,7 @@ h3{
     color: #060e95 !important;
     font-weight: 900;
 }
-#submit-selected-images{
+.rech-btn, #submit-selected-images{
     background-color: #060e95!important;
     color: #ffffff !important;
     font-weight: 600;
@@ -87,7 +87,86 @@ h3{
     margin: 10px 0px;
     min-height: 32px;
 }
-#submit-selected-images:hover{
+.pagination a{
+    background-color: #D2139E!important;
+    color: #ffffff !important;
+    font-weight: 600;
+    padding: 10px 12px;
+    cursor: pointer;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 3px;
+    margin: 10px 0px;
+    min-height: 32px;
+}
+.rech-btn:hover, #submit-selected-images:hover, .pagination a:hover{
     background: #000 !important;
     border-color: #000 !important;
 }
+.image-jdk-form {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    align-content: center;
+}
+.image-meta-form {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+.image-flx-forms {
+    display: flex;
+    gap: 20px;
+}
+.image-flx-1 {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+}
+.btn-image-form {
+    text-align: end;
+}
+.btn-image-form-2{
+    text-align: start;
+}
+.images-meta-title {
+    font-size: 16px;
+    margin-block: 18px;
+}
+.select-actions {
+    margin-block: 30px;
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+.col-1 {
+    display: flex;
+    align-items: flex-end;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -46,7 +46,8 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    alert('Les judokas et la saison ont été associés avec succès aux images.');
+                    //alert('Les judokas et la saison ont été associés avec succès aux images.');
+                    location.reload();
                 } else {
                     alert('Une erreur est survenue lors de l\'association.');
                 }
