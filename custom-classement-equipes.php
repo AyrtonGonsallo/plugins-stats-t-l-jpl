@@ -8,11 +8,10 @@
 
 
 
-$steps=array("FINAL FOUR","QUARTS DE FINALE C & D","QUARTS DE FINALE A & B","Poule A","Poule B","Poule C","Poule D");
 $results=array();
 
 
-    function get_classement_equipes_plugin( $saison_value){
+    function get_classement_equipes_plugin( $saison_value,$tri){
         
         $args = array(
             'post_type'      => 'rencontre',
@@ -197,6 +196,7 @@ $results=array();
 					$equipe2=get_field( 'equipe_judoka',$judoka2->ID )[0];
 					$equipes_par_saisons1 =get_field('equipes_par_saisons',$judoka1->ID);
 					$equipes_par_saisons2 =get_field('equipes_par_saisons',$judoka2->ID);
+					
 					//var_dump($equipes_par_saisons);
 					if ($equipes_par_saisons1) {
 						foreach ($equipes_par_saisons1 as $equipe11) {
@@ -221,6 +221,18 @@ $results=array();
 								}
 							}
 						}
+					}
+					$judoka_gagnant=$match['judoka_gagnant'];
+					if($judoka_gagnant!=null && $judoka_gagnant==1){
+						$results['total'][$equipe1->post_title][0]["matchs_v"]+=1;
+						$results['total'][$equipe2->post_title][0]["matchs_d"]+=1;
+						
+					}else if($judoka_gagnant!=null && $judoka_gagnant==2){
+						$results['total'][$equipe1->post_title][0]["matchs_d"]+=1;
+						$results['total'][$equipe2->post_title][0]["matchs_v"]+=1;
+					}else{
+						$results['total'][$equipe1->post_title][0]["matchs_nuls"]+=1;
+						$results['total'][$equipe2->post_title][0]["matchs_nuls"]+=1;
 					}
                     $results['total'][$equipe1->post_title][0]["combats_individuels"][] = [
                         "RencontreID" => $rencontre->ID,
@@ -310,13 +322,13 @@ $results=array();
 
 				}
                 
-				if($ippons_equ1>=6){
+				if($ippons_equ1>=5){
 
 					$results["total"][$equipe1->post_title][0]["bonus"]+=1;
 
 				}
 
-				if($ippons_equ2>=6){
+				if($ippons_equ2>=5){
 					$results["total"][$equipe2->post_title][0]["bonus"]+=1;
 				}
 
@@ -345,6 +357,8 @@ $results=array();
 				$results["total"][$equipe1->post_title][0]["points"]+=0;
 				$results["total"][$equipe2->post_title][0]["points"]+=3;
 			}
+			$results["total"][$equipe1->post_title][0]["points"]+=intval($matchs_liste[0]['bonus_equipe_1']);
+			$results["total"][$equipe2->post_title][0]["points"]+=intval($matchs_liste[0]['bonus_equipe_2']);
 		}
         
 
@@ -360,36 +374,65 @@ $sorted_result_ids=array();
 		foreach($result_by_equipe as $result_by_equipe_data){
 			//prettyPrint($result_by_equipe_data);
 			
-			array_push($sorted_result_ids,array("id"=>$result_by_equipe_data["nom"],"step"=>$result_by_equipe_data["step"],"points"=>$result_by_equipe_data["points"],"points_marqués"=>$result_by_equipe_data["points_marqués"],"ippons_marqués"=>$result_by_equipe_data["ippons_marqués"]));
+			array_push($sorted_result_ids,array("id"=>$result_by_equipe_data["nom"],"matchs_v"=>$result_by_equipe_data["matchs_v"],"points"=>$result_by_equipe_data["points"],"points_marqués"=>$result_by_equipe_data["points_marqués"],"ippons_marqués"=>$result_by_equipe_data["ippons_marqués"]));
 		}
 	}
-	$sorted_result_ids2=array_msort2($sorted_result_ids,array('points'=>SORT_DESC,'points_marqués'=>SORT_DESC,'ippons_marqués'=>SORT_DESC,'id'=>SORT_ASC));
+	if($tri=="classement"){
+		$sorted_result_ids2=array_msort2($sorted_result_ids,array('points'=>SORT_DESC,'matchs_v'=>SORT_DESC,'points_marqués'=>SORT_DESC,'ippons_marqués'=>SORT_DESC,'id'=>SORT_ASC));
+
+	}else if($tri=="offensive"){
+		$sorted_result_ids2=array_msort2($sorted_result_ids,array('points_marqués'=>SORT_DESC,'ippons_marqués'=>SORT_DESC,'id'=>SORT_ASC));
+
+	}
 	
 	//prettyPrint($sorted_result_ids);
-	//prettyPrint($sorted_result_ids2);
+	//var_dump($sorted_result_ids2);
 	//exit(-1);
-	$i=1;
-	$pts_prec=0;
+	if($tri=="classement"){
+		$count=0;
+		$i=1;
+		$pts_prec=0;
 		foreach($sorted_result_ids2 as $s2){
-			
-				$results['total'][$s2["id"]][0]["rang"]=$i;
-				$sorted_results['total'][$s2["id"]]=$results['total'][$s2["id"]];
-				
-				if(($s2["points"]!=0) && ($s2["points"]!=$pts_prec)){
-					$i+=1;
-				}
-				$pts_prec=$s2["points"];
-					
-				
-				
-				
+			$results['total'][$s2["id"]][0]["rang"]=$i;
+			$sorted_results['total'][$s2["id"]]=$results['total'][$s2["id"]];
+			if($count==0){
+				$i+=1;
+			}
+			if( ($s2["points"]<=$pts_prec)){
+				$i+=1;
+			}
+			$count+=1;
+			$pts_prec=$s2["points"];
 		}
-	//prettyPrint($sorted_results);
+	}else if($tri=="offensive"){
+		$count2=0;
+		$i2=1;
+		$pts_prec2=0;
+		$ipps_prec2=0;
+		foreach($sorted_result_ids2 as $s2){
+			$results['total'][$s2["id"]][0]["rang"]=$i2;
+			$sorted_results['total'][$s2["id"]]=$results['total'][$s2["id"]];
+			if($count2==0){
+				$i2+=1;
+			}
+			if( ($s2["points_marqués"]<$pts_prec2)){
+				$i2+=1;
+			}else if( ($s2["ippons_marqués"]<$ipps_prec2)){
+				$i2+=1;
+			}
+			
+			$count2+=1;
+			$pts_prec2=$s2["points_marqués"];
+			$ipps_prec2=$s2["ippons_marqués"];
+		}
+	}
+	
+	//var_dump($sorted_results);
 	//exit(-1);
 
 
 
-	return $results;
+	return $sorted_results;
         
     }
 
@@ -399,7 +442,7 @@ $sorted_result_ids=array();
     function get_classement_equipes( $data ) {
         $last_season_value = "2024-2025";
         
-        $class_classement_equipes = get_classement_equipes_plugin( $last_season_value )['total'];
+        $class_classement_equipes = get_classement_equipes_plugin( $last_season_value,"classement" )['total'];
         $response = array();
     
         foreach ( $class_classement_equipes as $d ) {
@@ -426,7 +469,9 @@ $sorted_result_ids=array();
                 'wazaris_marqués' => $d[0]['wazaris_marqués'] ?? 0,
                 'wazaris_concédés' => $d[0]['wazaris_concédés'] ?? 0,
                 'points_marqués' => $d[0]['points_marqués'] ?? 0,
+				'matchs_v' => $d[0]['matchs_v'] ?? 0,
                 'combats_individuels' => $d[0]['combats_individuels'] ?? '',
+
                 
             );
         }
@@ -450,7 +495,8 @@ $sorted_result_ids=array();
 	function get_classement_equipes_offensives( $data ) {
         $last_season_value = "2024-2025";
         
-        $class_classement_equipes = get_classement_equipes_plugin( $last_season_value )['total'];
+        $class_classement_equipes = get_classement_equipes_plugin( $last_season_value,"offensive" )['total'];
+		//var_dump($class_classement_equipes);exit(-1);
         $response = array();
     
         foreach ( $class_classement_equipes as $d ) {
@@ -485,8 +531,8 @@ $sorted_result_ids=array();
         // Sort by multiple fields: points (desc), ippons_marqués (desc)
 		usort($response, function ($a, $b) {
 			// Compare by points (desc)
-			if ($a['points'] != $b['points']) {
-				return $b['points'] - $a['points']; // Descending order
+			if ($a['points_marqués'] != $b['points_marqués']) {
+				return $b['points_marqués'] - $a['points_marqués']; // Descending order
 			}
 			// Compare by ippons_marqués (desc)
 			if ($a['ippons_marqués'] != $b['ippons_marqués']) {
@@ -523,3 +569,16 @@ add_action( 'rest_api_init', function () {
     );
 
 });
+
+add_action('rest_api_init', function() {
+    // Autoriser les requêtes CORS
+    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+    header("Access-Control-Allow-Headers: X-Requested-With, Content-Type, Authorization");
+
+    // Gestion des requêtes OPTIONS pour les pré-vols CORS
+    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        status_header(200);
+        exit();
+    }
+}, 15);

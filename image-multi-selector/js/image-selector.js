@@ -92,5 +92,10 @@ $('#deselect-all').on('change', function() {
         $('#select-all').prop('checked', false);
     }
 });
+
+$('.select2').select2({
+    placeholder: "Sélectionner un judoka",
+    allowClear: true
+});
     
 });

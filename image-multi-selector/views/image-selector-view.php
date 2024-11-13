@@ -37,10 +37,16 @@
             );
             ?>
             <div class="image-flx-forms">
+                <!-- Ajouter Select2 CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+<!-- Ajouter Select2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
             <div>
                 <!-- Champ pour sélectionner Judoka 1 -->
                 <label for="judoka1">Sélectionner Judoka 1 :</label>
-                <select name="judoka1" id="judoka1">
+                <select name="judoka1" id="judoka1" class="select2">
                     <option value="">Choisir un judoka</option>
                     <?php foreach ($selected_judokas as $judoka): ?>
                         <option value="<?php echo esc_attr($judoka->ID); ?>"><?php echo esc_html($judoka->post_title); ?></option>
@@ -50,7 +56,7 @@
             <div>
                 <!-- Champ pour sélectionner Judoka 2 -->
                 <label for="judoka2">Sélectionner Judoka 2 :</label>
-                <select name="judoka2" id="judoka2">
+                <select name="judoka2" id="judoka2" class="select2">
                     <option value="">Choisir un judoka</option>
                     <?php foreach ($selected_judokas as $judoka): ?>
                         <option value="<?php echo esc_attr($judoka->ID); ?>"><?php echo esc_html($judoka->post_title); ?></option>
@@ -62,7 +68,7 @@
                 <select name="saison" id="saison">
                     <option value="">Choisir une saison</option>
                     <?php foreach ($saisons as $key => $value): ?>
-                        <option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($value); ?></option>
+                        <option <?echo ($value=='2024-2025')?'selected':'';?> value="<?php echo esc_attr($key); ?>"><?php echo esc_html($value); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -168,13 +174,14 @@
             $total_pages = ceil($total_images / $posts_per_page);
 
             echo '<div class="pagination">';
+            echo '<div class="image-flx-forms">';
             if ($paged > 1) {
                 echo '<a href="' . add_query_arg(array('paged' => $paged - 1, 'search_title' => $search_title)) . '">&laquo; Précédent</a>';
             }
             if ($paged < $total_pages) {
                 echo '<a href="' . add_query_arg(array('paged' => $paged + 1, 'search_title' => $search_title)) . '">Suivant &raquo;</a>';
             }
-            
+            echo '</div>';
                 echo '<div class="btn-image-form-2">';
                 echo '<button type="submit" id="submit-selected-images">Valider</button>';
                 echo '</div>';

@@ -19,9 +19,21 @@ function start_scripts() {
         'post_type' => 'rencontre',
         'posts_per_page' => $posts_per_page,
         'offset' => $offset,
-        'meta_key' => 'date_de_debut',
-        'orderby' => 'meta_value_num',
+        'orderby' => 'title',
         'order' => 'ASC',
+        'meta_query'     => array(
+                'relation' => 'AND', // pour cette saison et les poules
+                array(
+                    'key'     => 'saisons',
+                    'compare' => 'LIKE',
+                    'value'   => "2024-2025",
+                ),
+                array(
+                    'key'     => 'niveau',
+                    'compare' => 'LIKE',
+                    'value'   => 'Phase de poules',
+                ),
+            ),
     );
     $rencontres = get_posts($args);
     

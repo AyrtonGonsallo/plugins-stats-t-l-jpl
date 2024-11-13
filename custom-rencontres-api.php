@@ -161,7 +161,7 @@ $results=array();
     function get_current_rencontres_plugin( $data ) {
         $last_season_value = "2024-2025";
         $now=date('Y/m/d H:i:s', strtotime('+3 hours'));
-        $class_rencontres = get_rencontres_data( $last_season_value,"Journée 1" )['total'];
+        $class_rencontres = get_rencontres_data( $last_season_value,"Journée 3" )['total'];
         $response = array();
     
         foreach ( $class_rencontres as $d ) {
@@ -173,6 +173,7 @@ $results=array();
                 'lieu_rencontre' => $d[0]['lieu_rencontre'] ?? '',
                 'date_de_debut' => $d[0]['date_de_debut'] ?? '',
                 'full_date_de_debut' => $d[0]['full_date_de_debut'] ?? '',
+                'date_timestamp' => $d[0]['date_timestamp'] ?? '',
                 'heure_de_debut' => $d[0]['heure_de_debut'] ?? '',
                 'statut' => $d[0]['statut'] ?? '',
                 'phase' => $d[0]['phase'] ?? '',
@@ -197,6 +198,11 @@ $results=array();
                 
             );
         }
+        usort($response, function ($a, $b) {
+            
+            // If ippons_marqués are equal, compare by wazaris_marqués (asc)
+            return $a['date_timestamp'] - $b['date_timestamp'];
+        });
         wp_send_json($response, 200, JSON_UNESCAPED_UNICODE);
 
     }
@@ -205,7 +211,7 @@ $results=array();
     function get_next_rencontres_plugin( $data ) {
         $last_season_value = "2024-2025";
         $now=date('Y/m/d H:i:s', strtotime('+3 hours'));
-        $class_rencontres = get_rencontres_data( $last_season_value,"Journée 2"  )['total'];
+        $class_rencontres = get_rencontres_data( $last_season_value,"Journée 3"  )['total'];
         $response = array();
     
         foreach ( $class_rencontres as $d ) {
@@ -216,6 +222,7 @@ $results=array();
                 'title' => $d[0]['title'] ?? '',
                 'lieu_rencontre' => $d[0]['lieu_rencontre'] ?? '',
                 'date_de_debut' => $d[0]['date_de_debut'] ?? '',
+                'date_timestamp' => $d[0]['date_timestamp'] ?? '',
                 'full_date_de_debut' => $d[0]['full_date_de_debut'] ?? '',
                 'heure_de_debut' => $d[0]['heure_de_debut'] ?? '',
                 'statut' => $d[0]['statut'] ?? '',
@@ -241,7 +248,11 @@ $results=array();
                 
             );
         }
-       
+        usort($response, function ($a, $b) {
+            
+            // If ippons_marqués are equal, compare by wazaris_marqués (asc)
+            return $a['date_timestamp'] - $b['date_timestamp'];
+        });
         // Sort by multiple fields: points_individuels_rencontre (desc), ippons_marqués 
        /* usort($response, function ($a, $b) {
             // Compare by points_equipe (desc)
@@ -341,3 +352,15 @@ add_action( 'rest_api_init', function () {
 });
 
 
+add_action('rest_api_init', function() {
+    // Autoriser les requêtes CORS
+    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+    header("Access-Control-Allow-Headers: X-Requested-With, Content-Type, Authorization");
+
+    // Gestion des requêtes OPTIONS pour les pré-vols CORS
+    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        status_header(200);
+        exit();
+    }
+}, 15);

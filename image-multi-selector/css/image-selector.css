@@ -97,7 +97,7 @@ h3{
     border-style: solid;
     border-radius: 3px;
     margin: 10px 0px;
-    min-height: 32px;
+    /*min-height: 32px;*/
 }
 .rech-btn:hover, #submit-selected-images:hover, .pagination a:hover{
     background: #000 !important;
@@ -146,8 +146,13 @@ h3{
     display: flex;
     align-items: flex-end;
 }
-
-
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.image-flx-forms { flex-wrap: wrap;}
+.image-flx-1 {  grid-template-columns: 1fr;  justify-items: start;}
 
 
 

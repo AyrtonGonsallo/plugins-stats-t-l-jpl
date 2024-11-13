@@ -495,8 +495,8 @@ function array_msort2($array, $cols)
         // Sort by multiple fields: points_individuels_judoka (desc), ippons_marqués 
         usort($response, function ($a, $b) {
             // Compare by points_equipe (desc)
-            if ($a['points_equipe'] != $b['points_equipe']) {
-                return $b['points_equipe'] - $a['points_equipe'];
+            if ($a['points_individuels_judoka'] != $b['points_individuels_judoka']) {
+                return $b['points_individuels_judoka'] - $a['points_individuels_judoka'];
             }
             if ($a['ippons_marqués'] != $b['ippons_marqués']) {
                 return $b['ippons_marqués'] - $a['ippons_marqués'];
@@ -578,3 +578,15 @@ add_action( 'rest_api_init', function () {
         )
     );
 });
+add_action('rest_api_init', function() {
+    // Autoriser les requêtes CORS
+    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+    header("Access-Control-Allow-Headers: X-Requested-With, Content-Type, Authorization");
+
+    // Gestion des requêtes OPTIONS pour les pré-vols CORS
+    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        status_header(200);
+        exit();
+    }
+}, 15);
