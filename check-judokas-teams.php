@@ -26,12 +26,12 @@ function start_scripts() {
                 array(
                     'key'     => 'saisons',
                     'compare' => 'LIKE',
-                    'value'   => "2024-2025",
+                    'value'   => "2025-2026",
                 ),
                 array(
                     'key'     => 'niveau',
                     'compare' => 'LIKE',
-                    'value'   => 'Phase de poules',
+                    'value'   => 'Final four',
                 ),
             ),
     );

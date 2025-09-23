@@ -352,12 +352,13 @@ function array_msort2($array, $cols)
                         $results['total'][$judoka1->post_title][0]["judoka_id"]=$judoka1->ID;
                         $results['total'][$judoka2->post_title][0]["judoka_id"]=$judoka2->ID;
                     }
+                    /*
                     if($results['total'][$judoka1->post_title][0]["ippons_marqués"]>=6){
                         $results['total'][$judoka1->post_title][0]["bonus"]=1;
                     }
                     if($results['total'][$judoka2->post_title][0]["ippons_marqués"]>=6){
                         $results['total'][$judoka2->post_title][0]["bonus"]=1;
-                    }
+                    }*/
                     
                   
                     
@@ -372,7 +373,7 @@ function array_msort2($array, $cols)
             
             return $results;
         }else{
-            $last_season_value="2024-2025";
+            $last_season_value="2025-2026";
             $args_judokas=array(
                 'post_type'=> 'judoka',
                 'posts_per_page' => -1,
@@ -458,7 +459,7 @@ function array_msort2($array, $cols)
 
 
     function get_stats_judokas( $data ) {
-        $last_season_value = "2024-2025";
+        $last_season_value = "2025-2026";
         
         $class_judokas = get_classement_plugin( $last_season_value )['total'];
         $response = array();
@@ -510,7 +511,7 @@ function array_msort2($array, $cols)
 
 
     function get_stats_judokas_marqueurs( $data ) {
-        $last_season_value = "2024-2025";
+        $last_season_value = "2025-2026";
         
         $class_judokas =  (get_classement_plugin( $last_season_value )['total']);
         $response = array();

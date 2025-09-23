@@ -1,0 +1,59 @@
+
+maternelles : Maternelles
+primaires : Primaires
+benjamins : Benjamins
+cadets : Cadets
+junior : Junior
+minimes : Minimes
+jujitsu_enfants : Jujitsu enfants
+jujitsu_ados_adultes : Jujitsu ado & adultes
+seniors : Seniors
+
+
+
+
+regrouper les cadets / juniors / seniors dans la catégorie "Cadets - Juniors - Seniors Compétition"
+créer une catégorie "judo loisirs" 
+Créer une catégorie "Poussins - Benjamins élites"
+
+
+benjamins : Benjamins
+cadets_juniors_seniors_competition : Cadets - Juniors - Seniors Compétition
+judo_loisirs : Judo loisirs
+jujitsu_enfants : Jujitsu enfants
+jujitsu_ados_adultes : Jujitsu ado & adultes
+maternelles : Maternelles
+minimes : Minimes
+poussins_benjamins_elites : Poussins - Benjamins élites
+primaires : Primaires
+
+
+  $categories_age = array(
+    'maternelles'   => 'Maternelles',
+	'primaires'       => 'Primaires',
+    'benjamins'      => 'Benjamins',
+    'poussins_benjamins_elites'      => 'Poussins - Benjamins élites',
+	'minimes'        => 'Minimes',
+	'jujitsu_enfants'       => 'Jujitsu enfants',
+    'judo_loisirs'       => 'Judo loisirs',
+    'cadets_juniors_seniors_competition'         => 'Cadets - Juniors - Seniors Compétition',
+	'jujitsu_ados_adultes'       => 'Jujitsu ado & adultes',
+);
+
+
+
+
+
+- partager ma ligue
+- vider les comptes, rencontres, donnees, trier les rencontres
+- importer les emails profs, toutes les donnees de notion
+- voir si on peut installer un lien pwa
+- enlever les logos ?  (demain)
+- remettre les bonus a jour
+- afficher les bonus serie sur paris finis
+- bouton profil sur home
+- corrections tests
+- ordre des rencontres pari
+- texte indications sur paris
+- multiplicateurs
+- partage

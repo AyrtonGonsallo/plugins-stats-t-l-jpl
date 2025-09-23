@@ -321,7 +321,7 @@ $results=array();
 					$results["total"][$equipe2->post_title][0]["equipe_id"]=$equipe2->ID;
 
 				}
-                
+                /*
 				if($ippons_equ1>=5){
 
 					$results["total"][$equipe1->post_title][0]["bonus"]+=1;
@@ -332,7 +332,7 @@ $results=array();
 					$results["total"][$equipe2->post_title][0]["bonus"]+=1;
 				}
 
-				
+				*/
 			}
 
 
@@ -357,8 +357,7 @@ $results=array();
 				$results["total"][$equipe1->post_title][0]["points"]+=0;
 				$results["total"][$equipe2->post_title][0]["points"]+=3;
 			}
-			$results["total"][$equipe1->post_title][0]["points"]+=intval($matchs_liste[0]['bonus_equipe_1']);
-			$results["total"][$equipe2->post_title][0]["points"]+=intval($matchs_liste[0]['bonus_equipe_2']);
+			
 		}
         
 
@@ -440,7 +439,7 @@ $sorted_result_ids=array();
 
 
     function get_classement_equipes( $data ) {
-        $last_season_value = "2024-2025";
+        $last_season_value = "2025-2026";
         
         $class_classement_equipes = get_classement_equipes_plugin( $last_season_value,"classement" )['total'];
         $response = array();
@@ -459,7 +458,6 @@ $sorted_result_ids=array();
                 'niveau' => $d[0]['niveau'] ?? '',
                 'rang' => $d[0]['rang'] ?? '',
                 'points' => $d[0]['points'] ?? 0,
-                'bonus' => $d[0]['bonus'] ?? 0,
                 'matchs_joues' => $d[0]['matchs_joues'] ?? 0,
                 'victoires' => $d[0]['victoires'] ?? 0,
                 'nuls' => $d[0]['nuls'] ?? 0,
@@ -493,7 +491,7 @@ $sorted_result_ids=array();
 
 
 	function get_classement_equipes_offensives( $data ) {
-        $last_season_value = "2024-2025";
+        $last_season_value = "2025-2026";
         
         $class_classement_equipes = get_classement_equipes_plugin( $last_season_value,"offensive" )['total'];
 		//var_dump($class_classement_equipes);exit(-1);
@@ -513,7 +511,6 @@ $sorted_result_ids=array();
                 'niveau' => $d[0]['niveau'] ?? '',
                 'rang' => $d[0]['rang'] ?? '',
                 'points' => $d[0]['points'] ?? 0,
-                'bonus' => $d[0]['bonus'] ?? 0,
                 'matchs_joues' => $d[0]['matchs_joues'] ?? 0,
                 'victoires' => $d[0]['victoires'] ?? 0,
                 'nuls' => $d[0]['nuls'] ?? 0,
