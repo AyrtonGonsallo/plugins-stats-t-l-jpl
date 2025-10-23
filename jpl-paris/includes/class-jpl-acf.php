@@ -28,7 +28,7 @@ class JPL_ACF {
                         'default_value' => 0,
                     ],
                     [
-                        'key' => 'field_se',
+                        'key' => 'field_series_jouees',
                         'label' => 'Séries jouées',
                         'name' => 'series_jouees',
                         'type' => 'number',
@@ -63,14 +63,14 @@ class JPL_ACF {
                         'default_value' => 0,
                     ],
                     [
-                        'key' => 'field_se',
+                        'key' => 'field_score_exact',
                         'label' => 'Score exact',
                         'name' => 'score_exact',
                         'type' => 'number',
                         'default_value' => 0,
                     ],
                     [
-                        'key' => 'field_serie',
+                        'key' => 'field_serie_en_cours',
                         'label' => 'Série en cours',
                         'name' => 'serie_en_cours',
                         'type' => 'number',

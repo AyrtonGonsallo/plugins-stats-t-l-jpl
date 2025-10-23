@@ -29,11 +29,24 @@
             <div class="images-meta-title">Associer des judokas et une saison aux images :</div>
 
             <?php
+            global $wpdb;
+
             // Liste des judokas
-            $selected_judokas = get_posts(array('post_type' => 'judoka', 'numberposts' => -1)); 
+            $judokas = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * 
+                    FROM prol_judokas_saisons 
+                    WHERE saison = %s 
+                    ORDER BY nom ASC, prenom ASC, sexe ASC",
+                    '2025-2026'
+                )
+            );
+
+
             $saisons = array(
                 '2023-2024' => '2023-2024',
                 '2024-2025' => '2024-2025',
+                '2025-2026' => '2025-2026',
             );
             ?>
             <div class="image-flx-forms">
@@ -48,8 +61,11 @@
                 <label for="judoka1">Sélectionner Judoka 1 :</label>
                 <select name="judoka1" id="judoka1" class="select2">
                     <option value="">Choisir un judoka</option>
-                    <?php foreach ($selected_judokas as $judoka): ?>
-                        <option value="<?php echo esc_attr($judoka->ID); ?>"><?php echo esc_html($judoka->post_title); ?></option>
+                    
+                    <?php foreach ($judokas as $j): 
+                        $judoka = get_post($j->judoka_id);
+                        $equipe = get_post($j->equipe_id);?>
+                        <option value="<?php echo esc_attr($judoka->ID); ?>"><?php echo esc_html($judoka->post_title); ?> (<?php echo esc_html($equipe->post_title); ?>)</option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -58,8 +74,10 @@
                 <label for="judoka2">Sélectionner Judoka 2 :</label>
                 <select name="judoka2" id="judoka2" class="select2">
                     <option value="">Choisir un judoka</option>
-                    <?php foreach ($selected_judokas as $judoka): ?>
-                        <option value="<?php echo esc_attr($judoka->ID); ?>"><?php echo esc_html($judoka->post_title); ?></option>
+                    <?php foreach ($judokas as $j): 
+                        $judoka = get_post($j->judoka_id);
+                        $equipe = get_post($j->equipe_id);?>
+                        <option value="<?php echo esc_attr($judoka->ID); ?>"><?php echo esc_html($judoka->post_title); ?> (<?php echo esc_html($equipe->post_title); ?>)</option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -68,7 +86,7 @@
                 <select name="saison" id="saison">
                     <option value="">Choisir une saison</option>
                     <?php foreach ($saisons as $key => $value): ?>
-                        <option <?echo ($value=='2024-2025')?'selected':'';?> value="<?php echo esc_attr($key); ?>"><?php echo esc_html($value); ?></option>
+                        <option <?echo ($value=='2025-2026')?'selected':'';?> value="<?php echo esc_attr($key); ?>"><?php echo esc_html($value); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>

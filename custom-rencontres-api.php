@@ -25,15 +25,17 @@ $results=array();
             array(  
                 'relation' => 'AND', // Ajout de la relation pour combiner les conditions
                 array(
-                    'key'     => 'journee',
-                    'compare' => 'LIKE',
-                    'value'   => $journee,
+                     'key'     => 'date_de_debut',
+                    'value'   => array(date('Y-m-d', strtotime('monday this week')), date('Y-m-d', strtotime('sunday this week'))),
+                    'compare' => 'BETWEEN',
+                    'type'    => 'DATE'
                 ),
                 array(
                     'key'        => 'saisons',
                     'compare'    => 'LIKE',
                     'value'      => $saison_value
                 )
+                
             ),	
         );
         $rencontres = new WP_Query( $args );
@@ -504,14 +506,90 @@ $results=array();
     function get_next_rencontres_plugin( $data ) {
         $last_season_value = "2025-2026";
         $now=date('Y/m/d H:i:s', strtotime('+3 hours'));
+       
+                
+        
+        
+        
+
+        global $wpdb;
         $class_rencontres = array();
-        for ($journee = 2; $journee <= 4; $journee++) {
-            $data = get_rencontres_data($last_season_value, "Journée $journee")['total'];
-            if (!empty($data)) {
-                // Fusionne dans la liste linéaire
-                $class_rencontres = array_merge($class_rencontres, $data);
+        $aujourdhui = current_time('Y-m-d');
+
+        // Semaine actuelle
+        $semaine_courante = date('o-W', strtotime($aujourdhui));
+
+        // 1️⃣ Récupérer uniquement les rencontres de la semaine en cours
+        $args_courante = array(
+            'post_type'      => 'rencontre',
+            'posts_per_page' => -1,
+            'orderby'        => 'meta_value',
+            'order'          => 'ASC',
+            'meta_key'       => 'date_de_debut',
+            'meta_query'     => array(
+                array(
+                    'key'     => 'saisons',
+                    'value'   => $last_season_value,
+                    'compare' => '='
+                ),
+                array(
+                    'key'     => 'date_de_debut',
+                    'value'   => array(date('Y-m-d', strtotime('monday this week')), date('Y-m-d', strtotime('sunday this week'))),
+                    'compare' => 'BETWEEN',
+                    'type'    => 'DATE'
+                )
+            )
+        );
+
+        $rencontres_courante = get_posts($args_courante);
+        $ids_rencontres = wp_list_pluck($rencontres_courante, 'ID');
+
+       
+        // 2️⃣ parcourir semaine par semaine pour trouver la semaine future la plus proche
+        $monday_courant = date('Y-m-d', strtotime("monday this week", strtotime($aujourdhui)));
+        $semaine_offset = 1;
+        while ($semaine_offset <= 52) { // max 1 an
+            $monday = date('Y-m-d', strtotime("+$semaine_offset week", strtotime($monday_courant)));
+            $sunday = date('Y-m-d', strtotime("$monday +6 days"));
+
+            $args_future = array(
+                'post_type'      => 'rencontre',
+                'posts_per_page' => -1,
+                'orderby'        => 'meta_value',
+                'order'          => 'ASC',
+                'meta_key'       => 'date_de_debut',
+                'meta_query'     => array(
+                    array(
+                        'key'     => 'saisons',
+                        'value'   => $last_season_value,
+                        'compare' => '='
+                    ),
+                    array(
+                        'key'     => 'date_de_debut',
+                        'value'   => array($monday, $sunday),
+                        'compare' => 'BETWEEN',
+                        'type'    => 'DATE'
+                    )
+                )
+            );
+
+            $rencontres_future = get_posts($args_future);
+
+            if (!empty($rencontres_future)) {
+                // Ajouter ces rencontres aux IDs existants sans écraser
+                $ids_rencontres = array_merge($ids_rencontres, wp_list_pluck($rencontres_future, 'ID'));
+                break; // arrêter après avoir trouvé la semaine future la plus proche
             }
+
+            $semaine_offset++;
         }
+
+        // 3️⃣ Appeler la fonction avec les IDs finaux
+        $class_rencontres = get_rencontres_data_by_ids($last_season_value, "Phase de poules", $ids_rencontres)['total'];
+
+
+
+
         $response = array();
         if($class_rencontres){
             foreach ( $class_rencontres as $d ) {
@@ -548,99 +626,6 @@ $results=array();
                     
                 );
             }
-        }else{
-            $response[] = array(
-                'id' => 5521,
-                'title' => 'FINAL 4 (DEMI-FINALE 1)',
-                'lieu_rencontre' =>  'Dojo de Paris',
-                'date_de_debut' => "18/01/2025 15:30 pm",
-                'date_timestamp' => 1736296400,
-                'full_date_de_debut' => "samedi 18 janvier 2025",
-                'heure_de_debut' => '15:30',
-                'statut' => "à venir",
-                'phase' => "Final four (Demi-finale)",
-                'journee' => "Final four (Demi-finale)",
-                'duree_combat' =>  '',
-                'equipe_1' => "Judo Nice Métropole",
-                'equipe_2' => "Auxerre Judo",
-                'abreviation_equipe_1' =>  "NIC",
-                'abreviation_equipe_2' =>  "AUX",
-                'logo_principal_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/NICE.png",
-                'logo_principal_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/AUXERRE.png",
-                'logo_circle_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/NIC_CIR.png",
-                'logo_circle_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/AUX_CIR.png",
-                'logo_miniature_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/NIC_CIR.png",
-                'logo_miniature_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/AUX_CIR.png",
-                'pts_e1' =>  0,
-                'pts_e2' =>  0,
-                'score_eq_1' =>  0,
-                'score_eq_2' =>  0,
-                'equipe_gagnante' => '',
-                'combats' =>  '',
-                
-            );
-            $response[] = array(
-                'id' => 5522,
-                'title' => 'FINAL 4 (DEMI-FINALE 2)',
-                'lieu_rencontre' =>  'Dojo de Paris',
-                'date_de_debut' => "18/01/2025 15:30 pm",
-                'date_timestamp' => 1736296400,
-                'full_date_de_debut' => "samedi 18 janvier 2025",
-                'heure_de_debut' => '15:30',
-                'statut' => "à venir",
-                'phase' => "Final four (Demi-finale)",
-                'journee' => "Final four (Demi-finale)",
-                'duree_combat' =>  '',
-                'equipe_1' => "US Orléans Judo Loiret",
-                'equipe_2' => "SGS Judo",
-                'abreviation_equipe_1' =>  "USO",
-                'abreviation_equipe_2' =>  "SGS",
-                'logo_principal_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/ORLEANS-1.png",
-                    'logo_principal_equipe_2' => "https://judoproleague.com/wp-content/uploads/2023/07/SGS.png",
-                    'logo_circle_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/USO_CIR.png",
-                    'logo_circle_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/SGS_CIR.png",
-                    'logo_miniature_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/USO_CIR.png",
-                    'logo_miniature_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/SGS_CIR.png",
-                'pts_e1' =>  0,
-                'pts_e2' =>  0,
-                'score_eq_1' =>  0,
-                'score_eq_2' =>  0,
-                'equipe_gagnante' => '',
-                'combats' =>  '',
-                
-            );
-            /*
-            $response[] = array(
-                'id' => 5523,
-                'title' => 'FINAL 4 (FINALE)',
-                'lieu_rencontre' =>  'Dojo de Paris',
-                'date_de_debut' => "18/01/2025 18:30 pm",
-                'date_timestamp' => 1736296400,
-                'full_date_de_debut' => "samedi 18 janvier 2025",
-                'heure_de_debut' => '18:30',
-                'statut' => "à venir",
-                'phase' => "Final four (Finale)",
-                'journee' => "Final four (Finale)",
-                'duree_combat' =>  '',
-                'equipe_1' => "Auxerre Judo",
-                'equipe_2' => "US Orléans Judo Loiret",
-                'abreviation_equipe_1' =>  "AUX",
-                'abreviation_equipe_2' =>  "US0",
-                'logo_principal_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/AUXERRE.png",
-                'logo_principal_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/ORLEANS-1.png",
-                'logo_circle_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/AUX_CIR.png",
-                'logo_circle_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/USO_CIR.png",
-                'logo_miniature_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/AUX_CIR.png",
-                'logo_miniature_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/USO_CIR.png",
-                'pts_e1' =>  0,
-                'pts_e2' =>  0,
-                'score_eq_1' =>  0,
-                'score_eq_2' =>  0,
-                'equipe_gagnante' => '',
-                'combats' =>  '',
-                
-            );
-            */
         }
        
         usort($response, function ($a, $b) {
@@ -667,6 +652,7 @@ $results=array();
     function get_rencontres_plugin( $data ) {
         $last_season_value = "2025-2026";
         $now=date('Y/m/d H:i:s',strtotime('-1 year'));
+        
         $class_rencontres = get_rencontres_data( $last_season_value,"Journée 1")['total'];
         $response = array();
     

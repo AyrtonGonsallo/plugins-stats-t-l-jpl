@@ -69,6 +69,8 @@ jQuery(document).ready(function($) {
         $('.close').on('click', function() {
             $('#lightbox').css('display', 'none');
         });
+
+      
     
         // Ferme la lightbox lorsqu'on clique en dehors de l'image
         $('#lightbox').on('click', function(e) {

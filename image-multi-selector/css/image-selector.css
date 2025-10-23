@@ -58,14 +58,14 @@
 }
 
 .lightbox-content {
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 80%;
+    max-height: 80%;
 }
 
 .close {
     position: absolute;
-    top: 20px;
-    right: 30px;
+    top: 51px;
+    right: 51px;
     color: white;
     font-size: 40px;
     font-weight: bold;

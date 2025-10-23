@@ -15,7 +15,7 @@ add_action('admin_enqueue_scripts', 'ims_enqueue_scripts');
 
 // Create a menu item
 function ims_create_menu() {
-    add_menu_page('Multiple images tagger', 'Multiple images tagger', 'manage_options', 'image-multi-selector', 'ims_render_selector_page','',50);
+    add_menu_page('Multiple images tagger', 'Multiple images tagger', 'upload_files', 'image-multi-selector', 'ims_render_selector_page','',50);
 }
 add_action('admin_menu', 'ims_create_menu');
 

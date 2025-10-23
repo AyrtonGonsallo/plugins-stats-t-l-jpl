@@ -12,7 +12,7 @@ setlocale(LC_ALL, 'fr_FR.UTF8', 'fr_FR','fr','fr','fra','fr_FR@euro');
 function start_scripts() {
     // Récupérer le paramètre de pagination dans l'URL
     $page = isset($_GET['page']) ? (int) $_GET['page'] : 0;
-    $posts_per_page = 2; // Nombre de rencontres par page
+    $posts_per_page = 5; // Nombre de rencontres par page
     $offset = $page * $posts_per_page; // Calculer l'offset basé sur la page
 
     $args = array(
@@ -29,9 +29,9 @@ function start_scripts() {
                     'value'   => "2025-2026",
                 ),
                 array(
-                    'key'     => 'niveau',
+                    'key'     => 'Journée',
                     'compare' => 'LIKE',
-                    'value'   => 'Final four',
+                    'value'   => 'Journée 1',
                 ),
             ),
     );

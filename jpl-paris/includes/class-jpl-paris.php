@@ -41,8 +41,8 @@ class JPL_Paris {
             'post_type'      => 'rencontre',
             'posts_per_page' => -1,
             'meta_key'       => 'date_de_debut',
-            'orderby'        => 'meta_value_num',
-            'order'          => 'DESC',
+            'orderby'        => 'meta_value',
+            'order'          => 'ASC',
             'meta_query'     => [
                 'relation' => 'AND',
                 [
@@ -69,7 +69,7 @@ class JPL_Paris {
             // 2️⃣ Récupérer les paris liés encore "a_venir"
             $paris_en_cours = get_posts([
                 'post_type'      => 'pari',
-                'posts_per_page' => -1,
+                'posts_per_page' => 100,
                 'orderby'        => 'ID',
                 'order'          => 'ASC',
                 'meta_query'     => [
@@ -162,6 +162,12 @@ class JPL_Paris {
         if (!isset($_GET['cron_update_score_total_series'])) {
             return;
         }
+        $batch = 0;
+        if (isset($_GET['batch'])) {
+            $batch = $_GET['batch'];
+        }else{
+            wp_die('Parametre batch manquant ❌');
+        }
 
         // 🔒 Sécurité
         $secret = 'SECRET123'; // à personnaliser
@@ -170,10 +176,18 @@ class JPL_Paris {
         }
 
         // 🎯 Étape 1 : récupérer toutes les séries
+       
+
+        $limit = 150;
+        $offset = $batch * $limit;
+
         $series = get_posts([
             'post_type'      => 'serie_de_paris',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish'
+            'posts_per_page' => $limit,
+            'post_status'    => 'publish',
+            'orderby'        => 'ID',
+            'order'          => 'ASC',
+            'offset'         => $offset
         ]);
 
         if (!$series) {
@@ -200,7 +214,8 @@ class JPL_Paris {
             $paris = get_posts([
                 'post_type'      => 'pari',
                 'posts_per_page' => -1,
-                'orderby'        => 'ID',
+                'meta_key'       => 'date',
+                'orderby'        => 'meta_value',
                 'order'          => 'ASC',
                 'meta_query'     => [
                     'relation' => 'AND',
@@ -211,8 +226,9 @@ class JPL_Paris {
                     ],
                     [
                         'key'     => 'status',
-                        'value'   => 'calcule',
-                        'compare' => 'LIKE'
+                       // 'value'   => 'calcule',
+                       'value'   => ['calcule','termine'],
+                       'compare' => 'IN'
                     ]
                 ]
             ]);
@@ -229,22 +245,25 @@ class JPL_Paris {
                 $points_obtenus = (int) get_field('points_obtenus', $pari->ID);
                 $bonus_applique = get_field('bonus_applique', $pari->ID);
                 $resultat       = get_field('resultats', $pari->ID);
+                $status_pari       = get_field('status', $pari->ID);
                 $juste          = 'score_et_vainqueur_juste';
                 $multiplicateur="x1";
-                $bon = ($resultat == $juste);
                 $gagne = in_array($resultat, ['score_juste','vainqueur_juste','score_et_vainqueur_juste']);
                 $is_se = in_array($resultat, ['score_juste','score_et_vainqueur_juste']);
+                $bon = $gagne;
                 
                 echo "\n--- Pari ID : {$pari->ID} ---\n";
                 echo "Total actuel : {$total_points}\n";
                 echo "Bonus : {$bonus_applique}\n";
                 echo "Points obtenus : {$points_obtenus}\n";
                 echo "Résultat : {$resultat}\n";
+                echo "Status pari : {$status_pari}\n";
                 if ($gagne) {
                     $total_paris_gagnes_actuels+=1;
                 }
                  if ($is_se) {
                     $total_score_exact_actuel+=1;
+                    echo "✅ Score exact\n";
                 }
                 if ($bon) {
                     echo "✅ Bon pari\n";
@@ -277,10 +296,9 @@ class JPL_Paris {
                 } else {
                     if ($bonus_applique === 'joker') {
                         echo "🎭 Joker utilisé : la série continue\n";
-                        $bons_pronos_consecutifs++;
                         $total_meilleure_serie_actuelle = $bons_pronos_consecutifs;
                         $total_points += $points_obtenus;
-                        continue;
+                        
                     } else {
                         echo "❌ Mauvais pari : série cassée\n";
                         $bons_pronos_consecutifs = 0;
@@ -288,8 +306,14 @@ class JPL_Paris {
                     }
                     
                 }
-                update_field('status', 'termine', $pari->ID);
-                update_field('multiplicateur', $multiplicateur, $pari->ID);
+                
+                if( $status_pari=="calcule"){
+                    update_field('status', 'termine', $pari->ID);
+                    update_field('multiplicateur', $multiplicateur, $pari->ID);
+                }
+                
+                
+                
                 echo "Bons pronos consécutifs : {$bons_pronos_consecutifs}\n";
             } // ✅ fin foreach($paris)
 
@@ -312,20 +336,25 @@ class JPL_Paris {
 
                 echo "\n👤 Utilisateur lié : {$user_id} - {$prenom} {$nom} ({$email})\n";
                 echo "Points actuels : {$current_points}\n";
-                echo "Points ajoutés : {$total_points}\n";
+                echo "Points calculée maintenant : {$total_points}\n";
+                echo "score_exact actuels : {$total_score_exact_actuel}\n";
+                echo "score_exact calculée maintenant : {$score_exact}\n";
+                echo "score_exact mis a jour : score_exact actuels {$score_exact} + total_score_exact_actuel {$total_score_exact_actuel}, 'user_' . {$user_id}\n";
                 echo "Séries jouées actuelles : {$series_jouees}\n";
-                echo "Séries jouées (ajoutée) : 1\n";
+                echo "Séries jouées (calculée maintenant) : 1\n";
                 echo "Meilleure série actuelle : {$meilleure_serie}\n";
-                echo "Meilleure série (ajouté) : {$total_meilleure_serie_actuelle}\n";
+                echo "Meilleure série (calculée maintenant) : {$total_meilleure_serie_actuelle}\n";
                 echo "Paris gagnés actuels : {$paris_gagnes}\n";
-                echo "Paris gagnés (ajoutés) : {$total_paris_gagnes_actuels}\n";
+                echo "Paris gagnés (calculée maintenant) : {$total_paris_gagnes_actuels}\n";
 
-                update_field('total_de_points', $current_points + $total_points, 'user_' . $user_id);
+
+                
+                update_field('total_de_points',  $total_points, 'user_' . $user_id);
                 update_field('serie_en_cours', $serie->ID, 'user_' . $user_id);
-                update_field('meilleure_serie', max($meilleure_serie, $total_meilleure_serie_actuelle), 'user_' . $user_id); // garde la meilleure
-                update_field('paris_gagnes', $paris_gagnes + $total_paris_gagnes_actuels, 'user_' . $user_id); // cumul des paris gagnés
-                update_field('paris_effectues', $paris_effectues + $total_paris_effectues_actuels, 'user_' . $user_id); // cumul des paris effectues
-                update_field('score_exact', $score_exact + $total_score_exact_actuel, 'user_' . $user_id);
+                update_field('meilleure_serie',  $total_meilleure_serie_actuelle, 'user_' . $user_id); // garde la meilleure
+                update_field('paris_gagnes',  $total_paris_gagnes_actuels, 'user_' . $user_id); // cumul des paris gagnés
+                update_field('paris_effectues',  $total_paris_effectues_actuels, 'user_' . $user_id); // cumul des paris effectues
+                update_field('score_exact',  $total_score_exact_actuel, 'user_' . $user_id);
                 update_field('series_jouees', $series_jouees + 1, 'user_' . $user_id); // incrémente le compteur
                 
             }
@@ -336,7 +365,9 @@ class JPL_Paris {
         echo "✅ Scores mis à jour\n";
         echo "</pre>";
 
- global $wpdb;
+
+        /* test
+        global $wpdb;
 
         // Récupération et tri des joueurs
         $all_users = $wpdb->get_results("
@@ -362,12 +393,132 @@ class JPL_Paris {
             }
         }
 
+        */
+
         exit;
 
 
 
 
     }
+
+
+
+    /**
+ * ⚡️ CRON : trouve les séries multiples des utilisateurs et les fusionne
+ * Appel via URL : http://rimo0631.odns.fr/?cron_check_multiple_user_series=1&key=SECRET123
+ */
+public static function cron_check_multiple_user_series() {
+    if (!isset($_GET['cron_check_multiple_user_series'])) {
+        return;
+    }
+
+    // 🔒 Sécurité
+    $secret = 'SECRET123'; // à personnaliser
+    if (!isset($_GET['key']) || $_GET['key'] !== $secret) {
+        wp_die('Accès refusé ❌');
+    }
+
+    $batch = 0; // changer si besoin (pagination manuelle)
+    $limit = 500; // combien de séries à traiter par passe
+    $offset = $batch * $limit;
+
+    // 🎯 Étape 1 : récupérer les séries
+    $series = get_posts([
+        'post_type'      => 'serie_de_paris',
+        'posts_per_page' => $limit,
+        'post_status'    => 'publish',
+        'orderby'        => 'ID',
+        'order'          => 'ASC',
+        'offset'         => $offset
+    ]);
+
+    if (!$series) {
+        echo "❌ Aucune série trouvée";
+        exit;
+    }
+
+    echo "<pre>";
+    echo "=== CRON MERGE SERIES ===\n";
+    echo "Nombre de séries chargées : " . count($series) . "\n\n";
+
+    // Regrouper séries par utilisateur
+    $user_series = [];
+    foreach ($series as $serie) {
+        $user = get_field('user', $serie->ID); // relation utilisateur
+
+    
+
+        if (!$user) continue;
+        $user_id = $user['ID'];
+
+        if (!isset($user_series[$user_id])) {
+            $user_series[$user_id] = [];
+        }
+        $user_series[$user_id][] = $serie;
+    }
+
+    // 🎯 Étape 2 : fusionner
+    foreach ($user_series as $user_id => $list) {
+        if (count($list) <= 1) {
+            continue; // rien à fusionner
+        }
+        $user_info = get_userdata($user_id);
+        if ($user_info) {
+            $nom    = get_field('nom','user_' . $user_id);
+            $prenom  = get_field('prenom','user_' . $user_id);
+             $email  = $user_info->user_email;
+           
+            echo "\n👤 Utilisateur lié : {$user_id} - {$prenom} {$nom} ({$email})\n";
+            echo "👤 Utilisateur ID $user_id a " . count($list) . " séries\n";
+        }
+
+
+       
+        // garder la plus ancienne (plus petit ID)
+        usort($list, function($a, $b) {
+            return $a->ID <=> $b->ID;
+        });
+        $main = array_shift($list);
+
+        echo "   ✅ Série principale gardée : {$main->ID}\n";
+        
+        // Pour chaque série secondaire
+        foreach ($list as $duplicate) {
+            echo "   🔄 Fusion de la série {$duplicate->ID} vers {$main->ID}\n";
+
+            // Récupérer ses paris
+            $paris = get_posts([
+                'post_type'      => 'pari',
+                'posts_per_page' => -1,
+                'meta_query'     => [
+                    [
+                        'key'     => 'serie',
+                        'value'   => $duplicate->ID,
+                        'compare' => 'LIKE'
+                    ]
+                ]
+            ]);
+
+            foreach ($paris as $pari) {
+                // Réassigner à la série principale
+                update_field('serie', $main->ID, $pari->ID);
+                echo "      → Pari {$pari->ID} réattribué à série {$main->ID}\n";
+            }
+
+            // Supprimer la série en double
+            wp_delete_post($duplicate->ID, true);
+            echo "   ❌ Série {$duplicate->ID} supprimée\n";
+        }
+            
+
+        echo "\n";
+    }
+
+    echo "=== FIN CRON ===";
+    echo "</pre>";
+    exit;
+}
 
 
 
@@ -383,6 +534,7 @@ class JPL_Paris {
         $score2         = intval($_POST['score2'] ?? 0);
         $vainqueur      = sanitize_text_field($_POST['vainqueur'] ?? '');
         $bonus          = sanitize_text_field($_POST['bonus'] ?? 'aucun');
+        $date_debut_rencontre=get_field('date_de_debut',$rencontre_id,false, false);
 
         if (!$rencontre_id || !$vainqueur) {
             wp_send_json_error("Paramètres invalides");
@@ -466,6 +618,7 @@ class JPL_Paris {
             update_field('vainqueur', $vainqueur, $pari_id);
             update_field('score_equipe_1', $score1, $pari_id);
             update_field('score_equipe_2', $score2, $pari_id);
+            update_field('date', $date_debut_rencontre, $pari_id);
             update_field('bonus_applique', $bonus, $pari_id);
             update_field('serie', $serie_id, $pari_id);
 
@@ -487,6 +640,7 @@ class JPL_Paris {
                 update_field('status', 'a_venir', $pari_id);
                 update_field('bonus_applique', $bonus, $pari_id);
                 update_field('serie', $serie_id, $pari_id);
+                update_field('date', $date_debut_rencontre, $pari_id);
 
                 wp_send_json_success("Pari créé avec succès !");
             }
@@ -500,34 +654,65 @@ class JPL_Paris {
 
 
 public static function get_stats_semaine( $date_from, $date_to ) {
-    // Normaliser dates (on suppose format correct mais tu peux valider si besoin)
-    $date_query = [
-        [
-            'after'     => $date_from,
-            'before'    => $date_to,
-            'inclusive' => true,
-        ]
-    ];
+    
 
-    // Récupérer les séries créées dans la fourchette
-    $series = get_posts([
-        'post_type'      => 'serie_de_paris',
+    // aide moi gpt a Récupérer les rencontres jouées dans la fourchette champ  'meta_key'       => 'date_de_debut',
+   $rencontres = get_posts([
+        'post_type'      => 'rencontre',
         'posts_per_page' => -1,
         'post_status'    => 'publish',
-        'date_query'     => $date_query,
+        'meta_query'     => [
+            [
+                'key'     => 'date_de_debut', // ACF date
+                'value'   => [$date_from, $date_to],
+                'compare' => 'BETWEEN',
+                'type'    => 'DATETIME' // ou 'DATE' selon le format stocké
+            ]
+        ],
     ]);
 
-    if ( ! $series ) {
+
+    if ( ! $rencontres ) {
         return [];
     }
 
     // Structure de cumul : user_id => stats
     $stats = [];
 
-    // Boucle sur chaque série
-    foreach ( $series as $serie ) {
+    // Boucle sur chaque rencontre
+    foreach ( $rencontres as $rencontre ) {
+        //recuperer les paris finis sur elle
+        $paris = get_posts([
+                'post_type'      => 'pari',
+                'posts_per_page' => -1,
+                'orderby'        => 'ID',
+                'order'          => 'ASC',
+                'meta_query'     => [
+                    'relation' => 'AND',
+                    [
+                        'key'     => 'rencontre',
+                        'value'   => $rencontre->ID,
+                        'compare' => 'LIKE'
+                    ],
+                    [
+                        'key'     => 'status',
+                        'value'   => 'termine',
+                        'compare' => 'LIKE'
+                    ]
+                ]
+            ]);
+
+           
+
+        
+
+
+        if ( ! $paris ) {
+            continue;
+        }
+        $cur=0;
         // Récupérer l'utilisateur lié à la série (si tu lies la série à un user via ACF 'user')
-        $serie_user = get_field( 'user', $serie->ID ); // relation ACF (tableau ou array)
+        $serie_user = get_field( 'serie', $paris[0]->ID ); // relation ACF (tableau ou array)
         $serie_user_id = 0;
         if ( $serie_user ) {
             // si ACF retourne un array ['ID' => x] ou un WP_User object
@@ -539,32 +724,6 @@ public static function get_stats_semaine( $date_from, $date_to ) {
                 $serie_user_id = intval( $serie_user ); // cas où ACF retourne l'ID directement
             }
         }
-
-        // Récupérer tous les paris "terminés" pour cette série
-        $paris = get_posts([
-            'post_type'      => 'pari',
-            'posts_per_page' => -1,
-            'orderby'        => 'ID',
-            'order'          => 'ASC',
-            'meta_query'     => [
-                'relation' => 'AND',
-                [
-                    'key'     => 'serie',
-                    'value'   => $serie->ID,
-                    'compare' => 'LIKE',
-                ],
-                [
-                    'key'     => 'status',
-                    'value'   => 'termine',
-                    'compare' => 'LIKE',
-                ],
-            ],
-        ]);
-
-        if ( ! $paris ) {
-            continue;
-        }
-        $cur=0;
 
         // Pour chaque pari, on doit connaître le user qui a parié.
         // J'assume que chaque post 'pari' contient un champ ACF 'user' / 'membre' / 'parieur' retournant l'ID ou relation.
@@ -627,7 +786,7 @@ public static function get_stats_semaine( $date_from, $date_to ) {
 
             $gagne = in_array( $resultat, ['score_juste', 'vainqueur_juste', 'score_et_vainqueur_juste'], true );
             $is_se = in_array( $resultat, ['score_juste', 'score_et_vainqueur_juste'], true );
-            $is_bon = ( $resultat === $juste ); // si tu définis "bon" comme score+vainqueur
+            $is_bon = ( $gagne ); // si tu définis "bon" comme score+vainqueur
 
             // bonus : considérer "aucun", "aucun " erreurs de saisie -> trim
             $bonus_applique_norm = is_string( $bonus_applique ) ? trim( strtolower( $bonus_applique ) ) : '';
@@ -674,7 +833,6 @@ public static function get_stats_semaine( $date_from, $date_to ) {
                 // Joker : si joker doit *garder* la série en cours mais ajouter ses points,
                 // ici on considère joker = prolonge la série (tu avais ce comportement)
                 if ( $bonus_applique_norm === 'joker' ) {
-                    $stats[ $parieur_id ]['current_serie']++;
                     // ajouter les points du pari (sans multiplier supplémentaire lié à la série)
                     $stats[ $parieur_id ]['total_points'] += $points_obtenus;
                     // mettre à jour meilleure série si besoin
@@ -694,9 +852,12 @@ public static function get_stats_semaine( $date_from, $date_to ) {
 
         // Si tu veux associer la série à son auteur et compter combien de séries il a, tu peux :
         if ( $serie_user_id ) {
+             $serie_user_data = get_user_by('id', $serie_user_id);
+            $pseudo = get_field('pseudo', 'user_'.$serie_user_id) ?: $serie_user_data->display_name;
             if ( ! isset( $stats[ $serie_user_id ] ) ) {
                 $stats[ $serie_user_id ] = [
                     'user_id'               => $serie_user_id,
+                    'user_pseudo'               => $pseudo,
                     'paris_effectues'       => 0,
                     'paris_gagnes'          => 0,
                     'score_exact'           => 0,
@@ -718,26 +879,33 @@ public static function get_stats_semaine( $date_from, $date_to ) {
     }
     unset( $stat );
 
-    // Trier par total_points DESC, paris_gagnes DESC, score_exact DESC
+    // Trier par total_points DESC, paris_gagnes DESC, score_exact DESC, puis pseudo ASC
     usort( $stats, function( $a, $b ) {
         if ( $a['total_points'] === $b['total_points'] ) {
             if ( $a['paris_gagnes'] === $b['paris_gagnes'] ) {
-                return $b['score_exact'] <=> $a['score_exact'];
+                if ( $a['meilleure_serie'] === $b['meilleure_serie'] ) {
+                    return $a['user_pseudo'] <=> $b['user_pseudo']; // ordre alphabétique
+                }
+                return $b['meilleure_serie'] <=> $a['meilleure_serie'];
             }
             return $b['paris_gagnes'] <=> $a['paris_gagnes'];
         }
         return $b['total_points'] <=> $a['total_points'];
-    } );
+    });
 
-    // Re-indexer par position (optionnel)
+    // Re-indexer et limiter aux 5 premiers
     $ranked = [];
     $pos = 1;
     foreach ( $stats as $s ) {
+        if ( $pos > 5 ) { // stop après 5
+            break;
+        }
         $s['rank'] = $pos++;
         $ranked[ $s['user_id'] ] = $s;
     }
 
     return $ranked; // tableau associatif user_id => stat_array (avec 'rank')
+
 }
 
 
@@ -799,6 +967,228 @@ public static function cron_update_and_save_stats_semaine() {
     wp_die('CRON terminé champions calculés et sauvegardés ✅');
 }
 
+
+   /**
+ * ⚡️ CRON : cree et sauvegarde les champions de la semaine
+ * Appel via URL : http://rimo0631.odns.fr/?cron_update_classement=1&key=SECRET123
+ */
+public static function cron_update_classement() {
+    if (!isset($_GET['cron_update_classement'])) {
+        return;
+    }
+
+    // 🔒 Sécurité
+    $secret = 'SECRET123'; // à personnaliser
+    if (!isset($_GET['key']) || $_GET['key'] !== $secret) {
+        wp_die('Accès refusé ❌');
+    }
+
+    global $wpdb;
+
+    // Récupération et tri des joueurs
+    $all_users = $wpdb->get_results("
+        SELECT u.ID,
+            um_points.meta_value AS total_points,
+            um_pg.meta_value AS paris_gagnes,
+            um_ms.meta_value AS meilleure_serie
+        FROM {$wpdb->users} u
+        INNER JOIN {$wpdb->usermeta} um_caps 
+            ON u.ID = um_caps.user_id 
+            AND um_caps.meta_key = '{$wpdb->prefix}capabilities'
+        LEFT JOIN {$wpdb->usermeta} um_points 
+            ON u.ID = um_points.user_id 
+            AND um_points.meta_key = 'total_de_points'
+        LEFT JOIN {$wpdb->usermeta} um_pg 
+            ON u.ID = um_pg.user_id 
+            AND um_pg.meta_key = 'paris_gagnes'
+        LEFT JOIN {$wpdb->usermeta} um_ms 
+            ON u.ID = um_ms.user_id 
+            AND um_ms.meta_key = 'meilleure_serie'
+        WHERE um_caps.meta_value LIKE '%joueur_jpl%'
+        ORDER BY 
+            CAST(um_points.meta_value AS UNSIGNED) DESC,
+            CAST(um_pg.meta_value AS UNSIGNED) DESC,
+            CAST(um_ms.meta_value AS UNSIGNED) DESC
+    ");
+
+    if (!$all_users) {
+        wp_die("❌ Aucun utilisateur trouvé");
+    }
+
+    // Tri complémentaire par pseudo quand égalité parfaite
+    usort($all_users, function($a, $b) {
+        // Comparaison points
+        $pa = (int)$a->total_points;
+        $pb = (int)$b->total_points;
+        if ($pa !== $pb) return $pb - $pa;
+
+        // Comparaison paris_gagnes
+        $ga = (int)$a->paris_gagnes;
+        $gb = (int)$b->paris_gagnes;
+        if ($ga !== $gb) return $gb - $ga;
+
+        // Comparaison meilleure série
+        $ma = (int)$a->meilleure_serie;
+        $mb = (int)$b->meilleure_serie;
+        if ($ma !== $mb) return $mb - $ma;
+
+        // Comparaison pseudo (fallback prénom/nom ou email)
+        $user_data_a = get_userdata($a->ID);
+        $user_data_b = get_userdata($b->ID);
+
+      
+        $pseudo_a = get_field('pseudo', 'user_' . $a->ID) ?: $user_data_a->display_name;
+
+        $pseudo_b = get_field('pseudo', 'user_' . $b->ID) ?: $user_data_b->display_name;
+
+        return strcasecmp($pseudo_a, $pseudo_b);
+    });
+
+
+    echo "<pre>";
+    echo "Nombre total d’utilisateurs trouvés : " . count($all_users) . "\n\n";
+
+    $rang = 1;
+    foreach ($all_users as $user) {
+        $user_id = $user->ID;
+        $user_data = get_userdata($user_id);
+
+       
+        $pseudo = get_field('pseudo', 'user_' . $user_id) ?: $user_data->display_name;
+
+     
+
+        // Affichage seulement (pas d’update_field encore)
+        echo "Rang provisoire #{$rang} | ID {$user_id} | {$pseudo} | Points: {$user->total_points} | Paris gagnés: {$user->paris_gagnes} | Meilleure série: {$user->meilleure_serie}\n";
+
+        // Mise à jour à activer plus tard :
+        update_field('classement', $rang, 'user_' . $user_id);
+
+        $rang++;
+    }
+
+    echo "</pre>";
+    exit;
+}
+
+/**
+     * ⚡️ CRON : Met à jour les combats individuels des judokas
+     * Appel via URL : http://rimo0631.odns.fr/?cron_update_combats=1&key=SECRET123
+     */
+    public static function cron_update_combats() {
+        if (!isset($_GET['cron_update_combats'])) {
+            return;
+        }
+
+        $rencontres = get_posts([
+            'post_type'      => 'rencontre',
+                'posts_per_page' => -1,
+                'meta_key'       => 'date_de_debut',
+                'orderby'        => 'meta_value',
+                'order'          => 'ASC',
+                'meta_query'     => [
+                    'relation' => 'AND',
+                    [
+                        'key'     => 'statut', // remplace par ton champ ACF exact
+                        'value'   => 'terminé',
+                        'compare' => 'LIKE'
+                    ],
+                    [
+                        'key'     => 'saisons',
+                        'value'   => '2025-2026',
+                        'compare' => 'LIKE'
+                    ]
+                ]
+        ]);
+        
+        echo "<pre>";
+
+        foreach ($rencontres as $rencontre) {
+            echo "Rencontre ".get_the_title( $rencontre->ID)."<br>";
+            $saison = get_field('saisons', $rencontre->ID); // champ saison sur rencontre
+            $matchs_liste = get_field('les_combat', $rencontre->ID);
+
+            if (!$matchs_liste || !is_array($matchs_liste)) {
+                continue;
+            }
+
+            foreach ($matchs_liste as $bloc) {
+                if (!isset($bloc['combats'])) {
+                    continue;
+                }
+
+                foreach ($bloc['combats'] as $match) {
+                    $judoka1 = !empty($match['judoka_equipe_1'][0]) ? $match['judoka_equipe_1'][0]->ID : null;
+                    $judoka2 = !empty($match['judoka_equipe_2'][0]) ? $match['judoka_equipe_2'][0]->ID : null;
+
+                    if (!$judoka1 || !$judoka2) {
+                        continue; // combat incomplet
+                    }
+
+                    // Vérifier si un combat existe déjà pour rencontre + judoka1 + judoka2
+                    $existing = get_posts([
+                        'post_type'      => 'combat',
+                        'posts_per_page' => 1,
+                        'meta_query'     => [
+                            'relation' => 'AND',
+                            ['key' => 'rencontre_id', 'value' => $rencontre->ID],
+                            ['key' => 'judoka_equipe_1', 'value' => $judoka1],
+                            ['key' => 'judoka_equipe_2', 'value' => $judoka2],
+                        ]
+                    ]);
+
+                    if ($existing) {
+                        echo "Combat ".get_the_title( $judoka1).' vs '.get_the_title( $judoka2).' existant <br>';
+                        continue; // déjà migré
+                        
+                    }
+                    echo "Combat ".get_the_title( $judoka1).' vs '.get_the_title( $judoka2).' ajouté <br>';
+
+                    // Crée un nouveau post combat
+                    $combat_id = wp_insert_post([
+                        'post_type'   => 'combat',
+                        'post_status' => 'publish',
+                        'post_title'  => get_the_title($rencontre->ID) . ' : '.get_the_title($judoka1).' vs '. get_the_title($judoka2),
+                    ]);
+
+                    if (is_wp_error($combat_id)) {
+                        continue;
+                    }
+
+                    // Champs de base
+                    update_field('judoka_equipe_1', $match['judoka_equipe_1'], $combat_id);
+                    update_field('judoka_equipe_2', $match['judoka_equipe_2'], $combat_id);
+                    update_field('judoka_gagnant', $match['judoka_gagnant'], $combat_id);
+
+                    update_field('valeur_wazari__judoka_1', $match['valeur_wazari__judoka_1'], $combat_id);
+                    update_field('valeurs_shidos_judoka_1', $match['valeurs_shidos_judoka_1'], $combat_id);
+                    update_field('valeur_ippons_comptes_judoka_1', $match['valeur_ippons_comptés_judoka_1'], $combat_id);
+                    update_field('valeur_ippon_judoka_1', $match['valeur_ippon_judoka_1'], $combat_id);
+                    update_field('points_judoka_1', $match['points_judoka_1'], $combat_id);
+                    update_field('kinza_1', $match['kinza_1'], $combat_id);
+                    update_field('yuko_1', $match['yuko_1'], $combat_id);
+
+                    update_field('valeur_wazari__judoka_2', $match['valeur_wazari__judoka_2'], $combat_id);
+                    update_field('valeurs_shidos_judoka_2', $match['valeurs_shidos_judoka_2'], $combat_id);
+                    update_field('valeur_ippons_comptes_judoka_2', $match['valeur_ippons_comptés_judoka_2'], $combat_id);
+                    update_field('valeur_ippon_judoka_2', $match['valeur_ippon_judoka_2'], $combat_id);
+                    update_field('points_judoka_2', $match['points_judoka_2'], $combat_id);
+                    update_field('kinza_2', $match['kinza_2'], $combat_id);
+                    update_field('yuko_2', $match['yuko_2'], $combat_id);
+
+                    update_field('categorie_de_poids', $match['categorie_de_poids'], $combat_id);
+
+                    // Ajout des infos relationnelles
+                    update_field('saisons', $saison, $combat_id);        // saison copiée depuis rencontre
+                    update_field('rencontre_id', $rencontre->ID, $combat_id); // stocker l’ID de la rencontre
+                }
+            }
+        }
+
+        echo "</pre>";
+        exit;
+
+    }
 
 
 }

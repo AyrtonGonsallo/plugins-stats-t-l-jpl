@@ -57,3 +57,96 @@ primaires : Primaires
 - texte indications sur paris
 - multiplicateurs
 - partage
+
+
+
+
+
+
+
+
+
+
+
+/**
+     * ⚡️ CRON : trouve les series multiples des utilisateurs et les fusionne
+     * Appel via URL : http://rimo0631.odns.fr/?cron_check_multiple_user_series=1&key=SECRET123
+     */
+    public static function cron_check_multiple_user_series() {
+        if (!isset($_GET['cron_check_multiple_user_series'])) {
+            return;
+        }
+
+        // 🔒 Sécurité
+        $secret = 'SECRET123'; // à personnaliser
+        if (!isset($_GET['key']) || $_GET['key'] !== $secret) {
+            wp_die('Accès refusé ❌');
+        }
+
+        // 🎯 Étape 1 : récupérer toutes les séries
+       
+
+        $batch = 1; // change selon la passe du script
+        $limit = 150;
+        $offset = $batch * $limit;
+
+        $series = get_posts([
+            'post_type'      => 'serie_de_paris',
+            'posts_per_page' => $limit,
+            'post_status'    => 'publish',
+            'orderby'        => 'ID',
+            'order'          => 'ASC',
+            'offset'         => $offset
+        ]);
+
+        if (!$series) {
+            echo "❌ Aucune série trouvée";
+            exit;
+        }
+
+        echo "<pre>";
+        echo "=== CRON UPDATE SCORE SERIES ===\n";
+        echo "Nombre total de séries : " . count($series) . "\n\n";
+
+
+        //sachant  que dans une serie $user = get_field('user', $serie->ID); // relation utilisateur
+
+        foreach ($series as $serie) {
+            $total_points = 0;
+            $total_meilleure_serie_actuelle = 0;
+            $total_score_exact_actuel = 0;
+            $total_paris_gagnes_actuels = 0;
+            $total_paris_effectues_actuels = 0;
+            $bons_pronos_consecutifs = 0;
+
+            echo "-------------------------\n";
+            echo "📌 Série ID : {$serie->ID} | Titre : {$serie->post_title}\n";
+
+            // 🎯 Étape 2 : récupérer les paris liés
+            $paris = get_posts([
+                'post_type'      => 'pari',
+                'posts_per_page' => -1,
+                'meta_key'       => 'date',
+                'orderby'        => 'meta_value',
+                'order'          => 'ASC',
+                'meta_query'     => [
+                    'relation' => 'AND',
+                    [
+                        'key'     => 'serie',
+                        'value'   =>  $serie->ID ,
+                        'compare' => 'LIKE'
+                    ],
+                    [
+                        'key'     => 'status',
+                       // 'value'   => 'calcule',
+                       'value'   => 'termine',
+                        'compare' => 'LIKE'
+                    ]
+                ]
+            ]);
+
+
+
+
+
+    }

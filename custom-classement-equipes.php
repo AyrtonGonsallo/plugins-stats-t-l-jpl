@@ -41,7 +41,7 @@ $results=array();
 	foreach($rencontres->posts as $rencontre){
 
 		$niveau=get_field("niveau",$rencontre->ID);
-		
+	
 
 		$matchs_liste=get_field('les_combat',$rencontre->ID);
 
@@ -144,7 +144,9 @@ $results=array();
 	}
 
 	foreach($rencontres->posts as $rencontre){
-
+		
+		$statut=get_field('statut', $rencontre->ID)['label'];
+		$vallable=($statut=='en cours' || $statut=='terminé');
 		$niveau=get_field("niveau",$rencontre->ID);
 		$mode_de_calcul_classement=get_field("mode_de_calcul_classement",$rencontre->ID);
 		$matchs_liste=get_field('les_combat',$rencontre->ID);
@@ -154,7 +156,7 @@ $results=array();
         $equipe1 = get_field('equipe_1',$rencontre->ID)[0];
         $equipe2 = get_field('equipe_2',$rencontre->ID)[0];
 		
-		if($matchs_liste[0]['combats']){
+		if($matchs_liste[0]['combats'] && $vallable){
 			$results["total"][$equipe1->post_title][0]["points_marqués"]+=intval($matchs_liste[0]['points_equipe_1']);
 			$results["total"][$equipe2->post_title][0]["points_marqués"]+=intval($matchs_liste[0]['points_equipe_2']);
 			$results["total"][$equipe1->post_title][0]["titre"]=$equipe1->post_title;
@@ -394,7 +396,7 @@ $sorted_result_ids=array();
 		foreach($sorted_result_ids2 as $s2){
 			$results['total'][$s2["id"]][0]["rang"]=$i;
 			$sorted_results['total'][$s2["id"]]=$results['total'][$s2["id"]];
-			if($count==0){
+			if($count==0 && !($s2["points"]<=$pts_prec)){
 				$i+=1;
 			}
 			if( ($s2["points"]<=$pts_prec)){
@@ -450,7 +452,7 @@ $sorted_result_ids=array();
             $response[] = array(
                 'id_ffjda' => $d[0]['id_ffjda'] ?? null,
                 'titre' => $d[0]['titre'] ?? '',
-				'phase'=>'journée 5',
+				'phase'=>'journée 1',
                 'abreviation' => $d[0]['abreviation'] ?? '',
                 'logo_miniature' => $d[0]['logo_miniature'] ?? '',
                 'logo_circle' => $d[0]['logo_circle'] ?? '',
@@ -503,7 +505,7 @@ $sorted_result_ids=array();
             $response[] = array(
                 'id_ffjda' => $d[0]['id_ffjda'] ?? null,
                 'titre' => $d[0]['titre'] ?? '',
-				'phase'=>'journée 5',
+				'phase'=>'journée 1',
                 'abreviation' => $d[0]['abreviation'] ?? '',
                 'logo_miniature' => $d[0]['logo_miniature'] ?? '',
                 'logo_circle' => $d[0]['logo_circle'] ?? '',

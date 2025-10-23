@@ -32,3 +32,6 @@ add_action('init', ['JPL_Paris', 'init']);
 add_action('init', ['JPL_Paris', 'cron_update_paris']); 
 add_action('init', ['JPL_Paris', 'cron_update_score_total_series']); 
 add_action('init', ['JPL_Paris', 'cron_update_and_save_stats_semaine']);
+add_action('init', ['JPL_Paris', 'cron_update_classement']);
+add_action('init', ['JPL_Paris', 'cron_check_multiple_user_series']);
+add_action('init', ['JPL_Paris', 'cron_update_combats']);
