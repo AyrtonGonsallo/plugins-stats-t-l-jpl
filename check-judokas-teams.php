@@ -31,7 +31,7 @@ function start_scripts() {
                 array(
                     'key'     => 'Journée',
                     'compare' => 'LIKE',
-                    'value'   => 'Journée 1',
+                    'value'   => 'Journée 2',
                 ),
             ),
     );
