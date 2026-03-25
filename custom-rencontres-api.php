@@ -6,7 +6,7 @@
  * Author: Gonsallo Ayrton
  */
 
-function array_msort($array, $cols)
+function array_msort22($array, $cols)
 	{
 		$colarr = array();
 		foreach ($cols as $col => $order) {
@@ -184,7 +184,7 @@ $results=array();
     //avoir le classement 
 
 
-    function get_classement($rencontres,$saison_value,$limit){
+    function get_classement22($rencontres,$saison_value,$limit){
         foreach($rencontres as $rencontre){
             //prettyPrint(get_field('les_combat')[0]['combats'][0]);exit(-1); 
             $matchs_liste=get_field('les_combat',$rencontre->ID);
@@ -437,7 +437,7 @@ $results=array();
             array_push($sorted_result_ids,array("id"=>$result[0]["nom"],"combats_gagnés"=>$result[0]["combats_gagnés"],"points_totaux"=>$result[0]["points"],"points"=>$result[0]["points"],"points_marqués"=>$result[0]["points_marqués"],"ippons_marqués"=>$result[0]["ippons_marqués"]));
         }
         
-        $sorted_result_ids2=array_slice(array_msort($sorted_result_ids,array('points_totaux'=>SORT_DESC,'combats_gagnés'=>SORT_DESC,'points_marqués'=>SORT_DESC,'ippons_marqués'=>SORT_DESC,'id'=>SORT_ASC)),0,$limit);
+        $sorted_result_ids2=array_slice(array_msort22($sorted_result_ids,array('points_totaux'=>SORT_DESC,'combats_gagnés'=>SORT_DESC,'points_marqués'=>SORT_DESC,'ippons_marqués'=>SORT_DESC,'id'=>SORT_ASC)),0,$limit);
         $i=0;
         foreach($sorted_result_ids2 as $s2){
             if($i<2){
@@ -623,7 +623,7 @@ $results=array();
                     'order' => 'DESC',  
                 );
                 $rencontres2=get_posts($args2);
-                $classement_equipes2=get_classement($rencontres2,$saison_value2,18);
+                $classement_equipes2=get_classement22($rencontres2,$saison_value2,18);
                 $top8_raw = array_slice($classement_equipes2, 0, 8);
 
                 $top8 = []; // tableau propre et réutilisable
@@ -1024,7 +1024,7 @@ $results=array();
         $last_season_value = "2025-2026";
         $now=date('Y/m/d H:i:s',strtotime('-1 year'));
         
-        $class_rencontres = get_rencontres_data( $last_season_value,"Journée 1")['total'];
+        $class_rencontres = get_rencontres_data( $last_season_value,"Journée 4")['total'];
         $response = array();
     
         foreach ( $class_rencontres as $d ) {
@@ -1136,11 +1136,67 @@ $results=array();
     function get_final_rencontres_plugin( $data ) {
         $last_season_value = "2025-2026";
         $now=date('Y/m/d H:i:s',strtotime('-1 year'));
-        $class_rencontres11 = get_final_rencontres_data( $last_season_value,"Quart de finale",true)['total'];
+        $class_rencontres11 = get_final_rencontres_data( $last_season_value,"Quart de finale")['total'];
      
 
-        $class_rencontres2 = get_final_rencontres_data( $last_season_value,"Final four (Demi-finale)")['total'];
-        $class_rencontres3 = get_final_rencontres_data( $last_season_value,"Final four (Finale)")['total'];
+        //$class_rencontres2 = get_final_rencontres_data( $last_season_value,"Final four (Demi-finale)")['total'];
+        //$class_rencontres3 = get_final_rencontres_data( $last_season_value,"Final four (Finale)")['total'];
+
+        $saison_value2="2025-2026";
+        $args2=array(
+            'post_type'=> 'rencontre',
+            'posts_per_page' => -1,
+            'meta_query'     => 
+            array(  
+                'relation' => 'and',   
+                array(      
+                    'key'        => 'niveau',      
+                    'compare'    => '=',      
+                    'value'      => 'Quart de finale'
+                    ),
+                array(
+                    'key'        => 'saisons',
+                    'compare'    => 'LIKE',
+                    'value'      => $saison_value2
+                ),
+            ),		
+            'orderby' => 'post_title',
+            'order' => 'ASC',  
+        );
+        $rencontres2=get_posts($args2);
+        $winers = []; 
+        $i=1;
+        foreach ($rencontres2 as $rencontre):
+            $combat=get_field('les_combat', $rencontre->ID)[0]; 
+            $equipe1 =get_field('equipe_1', $rencontre->ID)[0];
+            $equipe2 =get_field('equipe_2', $rencontre->ID)[0];
+        
+            $image1_url=(get_field('logo_miniature', $equipe1->ID))?get_field('logo_miniature', $equipe1->ID):get_the_post_thumbnail_url($equipe1->ID);
+            $image2_url=(get_field('logo_miniature', $equipe2->ID))?get_field('logo_miniature', $equipe2->ID):get_the_post_thumbnail_url($equipe2->ID);
+        
+            $abreviation1=(get_field('abreviation', $equipe1->ID))?get_field('abreviation', $equipe1->ID):$equipe1->post_title;
+            $abreviation2=(get_field('abreviation', $equipe2->ID))?get_field('abreviation', $equipe2->ID):$equipe2->post_title;
+            $equipe_gagnante =  $combat['equipe_gagnante'];
+            if($equipe_gagnante=='équipe 1'){
+                $winers[] = [            
+                    'nom'   => $equipe1->post_title,
+                    'image' => $image1_url,           
+                ];
+            }
+            else if($equipe_gagnante=='équipe 2'){
+                $winers[] = [            
+                    'nom'   => $equipe2->post_title,
+                    'image' => $image2_url,          
+                ]; 
+            }
+            else{
+                $winers[] = [            
+                    'nom'   => "Vainqueur QF $i",
+                    'image' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",          
+                ];
+            }
+            $i+=1;
+        endforeach;
 
         $response = array();
         
@@ -1224,24 +1280,24 @@ $results=array();
                     'id' => 5521,
                     'title' => 'FINAL 4 (DEMI-FINALE 1)',
                     'lieu_rencontre' =>  'Dojo de Paris',
-                    'date_de_debut' => "18/01/2025 15:30 pm",
+                    'date_de_debut' => "",
                     'date_timestamp' => 1736296400,
-                    'full_date_de_debut' => "samedi 18 janvier 2025",
-                    'heure_de_debut' => '15:30',
+                    'full_date_de_debut' => "",
+                    'heure_de_debut' => '',
                     'statut' => "à venir",
                     'phase' => "Final four (Demi-finale)",
                     'journee' => "Final four (Demi-finale)",
                     'duree_combat' =>  '',
-                    'equipe_1' => "Judo Nice Métropole",
-                    'equipe_2' => "Auxerre Judo",
-                    'abreviation_equipe_1' =>  "NIC",
-                    'abreviation_equipe_2' =>  "AUX",
-                    'logo_principal_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/NICE.png",
-                    'logo_principal_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/AUXERRE.png",
-                    'logo_circle_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/NIC_CIR.png",
-                    'logo_circle_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/AUX_CIR.png",
-                    'logo_miniature_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/NIC_CIR.png",
-                    'logo_miniature_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/AUX_CIR.png",
+                    'equipe_1' => $winers[0]['nom'],
+                    'equipe_2' => $winers[3]['nom'],
+                    'abreviation_equipe_1' =>  "",
+                    'abreviation_equipe_2' =>  "",
+                    'logo_principal_equipe_1' => $winers[0]['image'],
+                    'logo_principal_equipe_2' => $winers[3]['image'],
+                    'logo_circle_equipe_1' => $winers[0]['image'],
+                    'logo_circle_equipe_2' => $winers[3]['image'],
+                    'logo_miniature_equipe_1' => $winers[0]['image'],
+                    'logo_miniature_equipe_2' => $winers[3]['image'],
                     'pts_e1' =>  0,
                     'pts_e2' =>  0,
                     'score_eq_1' =>  0,
@@ -1253,25 +1309,25 @@ $results=array();
                 $response[] = array(
                     'id' => 5522,
                     'title' => 'FINAL 4 (DEMI-FINALE 2)',
-                    'lieu_rencontre' =>  'Dojo de Paris',
-                    'date_de_debut' => "18/01/2025 15:30 pm",
+                    'lieu_rencontre' =>  '',
+                    'date_de_debut' => "",
                     'date_timestamp' => 1736296400,
-                    'full_date_de_debut' => "samedi 18 janvier 2025",
-                    'heure_de_debut' => '15:30',
+                    'full_date_de_debut' => "",
+                    'heure_de_debut' => '',
                     'statut' => "à venir",
                     'phase' => "Final four (Demi-finale)",
                     'journee' => "Final four (Demi-finale)",
                     'duree_combat' =>  '',
-                    'equipe_1' => "US Orléans Judo Loiret",
-                    'equipe_2' => "SGS Judo",
-                    'abreviation_equipe_1' =>  "USO",
-                    'abreviation_equipe_2' =>  "SGS",
-                    'logo_principal_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/ORLEANS-1.png",
-                    'logo_principal_equipe_2' => "https://judoproleague.com/wp-content/uploads/2023/07/SGS.png",
-                    'logo_circle_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/USO_CIR.png",
-                    'logo_circle_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/SGS_CIR.png",
-                    'logo_miniature_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/USO_CIR.png",
-                    'logo_miniature_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/SGS_CIR.png",
+                    'equipe_1' => $winers[1]['nom'],
+                    'equipe_2' => $winers[2]['nom'],
+                    'abreviation_equipe_1' =>  "",
+                    'abreviation_equipe_2' =>  "",
+                   'logo_principal_equipe_1' => $winers[1]['image'],
+                    'logo_principal_equipe_2' => $winers[2]['image'],
+                    'logo_circle_equipe_1' => $winers[1]['image'],
+                    'logo_circle_equipe_2' => $winers[2]['image'],
+                    'logo_miniature_equipe_1' => $winers[1]['image'],
+                    'logo_miniature_equipe_2' => $winers[2]['image'],
                     'pts_e1' =>  0,
                     'pts_e2' =>  0,
                     'score_eq_1' =>  0,
@@ -1322,25 +1378,25 @@ $results=array();
             $response[] = array(
                 'id' => 5523,
                 'title' => 'FINAL 4 (FINALE)',
-                'lieu_rencontre' =>  'Dojo de Paris',
-                'date_de_debut' => "18/01/2025 18:30 pm",
+                'lieu_rencontre' =>  '',
+                'date_de_debut' => "",
                 'date_timestamp' => 1736296400,
-                'full_date_de_debut' => "samedi 18 janvier 2025",
-                'heure_de_debut' => '18:30',
+                'full_date_de_debut' => "",
+                'heure_de_debut' => '',
                 'statut' => "à venir",
                 'phase' => "Finale",
                 'journee' => "Finale",
                 'duree_combat' =>  '',
-                'equipe_1' => "Auxerre Judo",
-                'equipe_2' => "US Orléans Judo Loiret",
-                'abreviation_equipe_1' =>  "AUX",
-                'abreviation_equipe_2' =>  "US0",
-               'logo_principal_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/AUXERRE.png",
-                'logo_principal_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/ORLEANS-1.png",
-                'logo_circle_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/AUX_CIR.png",
-                'logo_circle_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/USO_CIR.png",
-                'logo_miniature_equipe_1' => "https://judoproleague.com/wp-content/uploads/2022/11/AUX_CIR.png",
-                'logo_miniature_equipe_2' => "https://judoproleague.com/wp-content/uploads/2022/11/USO_CIR.png",
+                'equipe_1' => "Vainqueur DF 1",
+                'equipe_2' => "Vainqueur DF 2",
+                'abreviation_equipe_1' =>  "",
+                'abreviation_equipe_2' =>  "",
+               'logo_principal_equipe_1' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",
+                'logo_principal_equipe_2' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",
+                'logo_circle_equipe_1' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",
+                'logo_circle_equipe_2' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",
+                'logo_miniature_equipe_1' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",
+                'logo_miniature_equipe_2' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",
                 'pts_e1' =>  0,
                 'pts_e2' =>  0,
                 'score_eq_1' =>  0,
