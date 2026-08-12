@@ -265,47 +265,57 @@ class JPL_Paris {
                     $total_score_exact_actuel+=1;
                     echo "✅ Score exact\n";
                 }
-                if ($bon) {
-                    echo "✅ Bon pari\n";
-                    $bons_pronos_consecutifs++;
-                    $total_meilleure_serie_actuelle = $bons_pronos_consecutifs;
-                    // ⚡️ Multiplicateurs
-                    if ($bons_pronos_consecutifs == 3) {
-                        $points_obtenus *= 3;
-                        echo "Multiplicateur par 3 de ce score : {$points_obtenus}\n";
-                        $multiplicateur="x3";
-                    } elseif ($bons_pronos_consecutifs == 6) {
-                        $points_obtenus *= 6;
-                        echo "Multiplicateur par 3 de ce score : {$points_obtenus}\n";
-                        $multiplicateur="x6";
-                    } elseif ($bons_pronos_consecutifs == 9) {
-                        $points_obtenus *= 9;
-                        echo "Multiplicateur par 9 de ce score : {$points_obtenus}\n";
-                        $multiplicateur="x9";
-                    } elseif ($bons_pronos_consecutifs == 12) {
-                        $points_obtenus *= 12;
-                        echo "Multiplicateur par 12 de ce score : {$points_obtenus}\n";
-                        $multiplicateur="x12";
-                    } elseif ($bons_pronos_consecutifs == 15) {
-                        $points_obtenus *= 15;
-                        echo "Multiplicateur par 15 de ce score : {$points_obtenus}\n";
-                        $multiplicateur="x15";
-                    }
+               if ($bon) {
+    echo "✅ Bon pari\n";
+    $bons_pronos_consecutifs++;
 
-                    $total_points += $points_obtenus;
-                } else {
-                    if ($bonus_applique === 'joker') {
-                        echo "🎭 Joker utilisé : la série continue\n";
-                        $total_meilleure_serie_actuelle = $bons_pronos_consecutifs;
-                        $total_points += $points_obtenus;
-                        
-                    } else {
-                        echo "❌ Mauvais pari : série cassée\n";
-                        $bons_pronos_consecutifs = 0;
-                        $total_points += $points_obtenus;
-                    }
-                    
-                }
+    // 🔥 MAJ de la meilleure série atteinte
+    $total_meilleure_serie_actuelle = max($total_meilleure_serie_actuelle, $bons_pronos_consecutifs);
+
+    // ⚡️ Multiplicateurs
+    if ($bons_pronos_consecutifs == 3) {
+        $points_obtenus *= 3;
+        echo "Multiplicateur par 3 de ce score : {$points_obtenus}\n";
+        $multiplicateur="x3";
+    } elseif ($bons_pronos_consecutifs == 6) {
+        $points_obtenus *= 6;
+        echo "Multiplicateur par 6 de ce score : {$points_obtenus}\n";
+        $multiplicateur="x6";
+    } elseif ($bons_pronos_consecutifs == 9) {
+        $points_obtenus *= 9;
+        echo "Multiplicateur par 9 de ce score : {$points_obtenus}\n";
+        $multiplicateur="x9";
+    } elseif ($bons_pronos_consecutifs == 12) {
+        $points_obtenus *= 12;
+        echo "Multiplicateur par 12 de ce score : {$points_obtenus}\n";
+        $multiplicateur="x12";
+    } elseif ($bons_pronos_consecutifs == 15) {
+        $points_obtenus *= 15;
+        echo "Multiplicateur par 15 de ce score : {$points_obtenus}\n";
+        $multiplicateur="x15";
+    }
+
+    $total_points += $points_obtenus;
+
+} else {
+
+    if ($bonus_applique === 'joker') {
+        echo "🎭 Joker utilisé : la série continue\n";
+        // ❗ Même logique : on ne touche pas à la meilleure série
+        $total_meilleure_serie_actuelle = max($total_meilleure_serie_actuelle, $bons_pronos_consecutifs);
+
+        $total_points += $points_obtenus;
+
+    } else {
+        echo "❌ Mauvais pari : série cassée\n";
+
+        // ❗ On casse la série, mais la meilleure série reste intacte
+        $bons_pronos_consecutifs = 0;
+
+        $total_points += $points_obtenus;
+    }
+}
+
                 
                 if( $status_pari=="calcule"){
                     update_field('status', 'termine', $pari->ID);
@@ -346,8 +356,7 @@ class JPL_Paris {
                 echo "Meilleure série (calculée maintenant) : {$total_meilleure_serie_actuelle}\n";
                 echo "Paris gagnés actuels : {$paris_gagnes}\n";
                 echo "Paris gagnés (calculée maintenant) : {$total_paris_gagnes_actuels}\n";
-
-
+			
                 
                 update_field('total_de_points',  $total_points, 'user_' . $user_id);
                 update_field('serie_en_cours', $serie->ID, 'user_' . $user_id);
@@ -1189,6 +1198,83 @@ public static function cron_update_classement() {
         exit;
 
     }
+
+
+
+    /**
+     * ⚡️ CRON : Met à zero les totaux users pour la saison prochaine
+     * Appel via URL : http://rimo0631.odns.fr/?cron_resset_score_total_series=1&batch=0&key=SECRET123
+     */
+    public static function cron_resset_score_total_series() {
+        if (!isset($_GET['cron_resset_score_total_series'])) {
+            return;
+        }
+        $batch = 0;
+        if (isset($_GET['batch'])) {
+            $batch = $_GET['batch'];
+        }else{
+            wp_die('Parametre batch manquant ❌');
+        }
+
+        // 🔒 Sécurité
+        $secret = 'SECRET123'; // à personnaliser
+        if (!isset($_GET['key']) || $_GET['key'] !== $secret) {
+            wp_die('Accès refusé ❌');
+        }
+
+        // 🎯 Étape 1 : récupérer toutes les séries
+       
+
+        $limit = 150;
+        $offset = $batch * $limit;
+
+        $users = get_users([
+            'role'    => 'joueur_jpl',
+            'number'  => $limit,
+            'offset'  => $offset,
+            'orderby' => 'ID',
+            'order'   => 'ASC',
+        ]);
+
+
+      
+
+        echo "<pre>";
+        echo "=== CRON resset scores ===\n";
+        echo "Nombre total de users : " . count($users) . "\n\n";
+
+        foreach ($users as $user) {
+           
+
+            update_field('total_de_points', 0, 'user_' . $user->ID);
+            update_field('meilleure_serie', 0, 'user_' . $user->ID);
+            update_field('paris_gagnes', 0, 'user_' . $user->ID);
+            update_field('paris_effectues', 0, 'user_' . $user->ID);
+            update_field('score_exact', 0, 'user_' . $user->ID);
+            update_field('serie_en_cours', null, 'user_' . $user->ID);
+
+            // uniquement si tu souhaites réellement repartir à zéro
+            update_field('series_jouees', 0, 'user_' . $user->ID);
+            echo 'Utilisateur ' . $user->ID
+        . ' - ' . $user->user_email
+        . ' mis à jour.' . PHP_EOL;
+
+    echo "-------------------------" . PHP_EOL;
+        }
+
+        echo "✅ Scores users mis à zero\n";
+        echo "</pre>";
+
+
+
+        exit;
+
+
+
+
+    }
+
+
 
 
 }

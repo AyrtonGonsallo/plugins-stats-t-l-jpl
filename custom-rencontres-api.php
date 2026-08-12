@@ -48,10 +48,9 @@ $results=array();
             array(  
                 'relation' => 'AND', // Ajout de la relation pour combiner les conditions
                 array(
-                     'key'     => 'date_de_debut',
-                    'value'   => array(date('Y-m-d', strtotime('monday this week')), date('Y-m-d', strtotime('sunday this week'))),
-                    'compare' => 'BETWEEN',
-                    'type'    => 'DATE'
+                    'key'        => 'niveau',      
+                    'compare'    => 'LIKE',
+                    'value'      => 'Final four'
                 ),
                 array(
                     'key'        => 'saisons',
@@ -583,18 +582,7 @@ $results=array();
                             
                         }
 
-                        $results['total'][$rencontre->ID][0]["combats"] = [
-                            ["affiche" => "METROT Léa vs LOUCHENE Aya"],
-                            ["affiche" => "MASSON JBILOU Driss vs Marin CHABON"],
-                            ["affiche" => "DE CARVALHO Alya vs Clémentine LENOIR"],
-                            ["affiche" => "GIBELLI Enzo vs Livio PISTOL"],
-                            ["affiche" => "DRID Rania vs Jeanne GASTRIN"],
-                            ["affiche" => "GNAMIEN Marc Elie vs ROUSSEL Robin"],
-                            ["affiche" => "Mélanie LEGOUX CLEMENT vs CHASSE Lise"],
-                            ["affiche" => "GNAMIEN Tizie vs DIAO Abderhamane"],
-                            ["affiche" => "DIARRASSOUBA Océane vs judokas non présenté (JC Chilly Mazarin Morangis)"],
-                            ["affiche" => "ANDREEV Guerman vs SIEWE DJIEKAM Kris"]
-                        ];
+                        
                         
                     
                         
@@ -875,7 +863,7 @@ $results=array();
 
 
     function get_next_rencontres_plugin( $data ) {
-        $last_season_value = "2025-2026";
+        $last_season_value = "2026-2027";
         $now=date('Y/m/d H:i:s', strtotime('+3 hours'));
        
                 
@@ -1038,7 +1026,7 @@ $results=array();
                 'date_timestamp' => $d[0]['date_timestamp'] ?? '',
                 'full_date_de_debut' => $d[0]['full_date_de_debut'] ?? '',
                 'heure_de_debut' => $d[0]['heure_de_debut'] ?? '',
-                'statut' => $d[0]['statut'] ?? '',
+                'statut' => 'terminé',
                 'phase' => $d[0]['phase'] ?? '',
                 'journee' => $d[0]['phase'] ?? '',
                 'duree_combat' => $d[0]['duree_combat'] ?? '',
@@ -1052,11 +1040,11 @@ $results=array();
                 'logo_circle_equipe_2' => $d[0]['logo_circle_2'] ?? "",
                 'logo_miniature_equipe_1' => $d[0]['logo_miniature_1'] ?? "",
                 'logo_miniature_equipe_2' => $d[0]['logo_miniature_2'] ?? "",
-                'pts_e1' => $d[0]['pts_e1'] ?? 0,
-                'pts_e2' => $d[0]['pts_e2'] ?? 0,
-                'score_eq_1' => $d[0]['ncge1'] ?? 0,
-                'score_eq_2' => $d[0]['ncge2'] ?? 0,
-                'equipe_gagnante' => $d[0]['equipe_gagnante'] ?? '',
+                'pts_e1' =>  0,
+                'pts_e2' =>  0,
+                'score_eq_1' =>  0,
+                'score_eq_2' =>  0,
+                'equipe_gagnante' =>  '',
                 'combats' => $d[0]['combats'] ?? '',
                 
             );
@@ -1139,8 +1127,8 @@ $results=array();
         $class_rencontres11 = get_final_rencontres_data( $last_season_value,"Quart de finale")['total'];
      
 
-        //$class_rencontres2 = get_final_rencontres_data( $last_season_value,"Final four (Demi-finale)")['total'];
-        //$class_rencontres3 = get_final_rencontres_data( $last_season_value,"Final four (Finale)")['total'];
+        $class_rencontres2 = get_final_rencontres_data( $last_season_value,"Final four (Demi-finale)")['total'];
+        $class_rencontres3 = get_final_rencontres_data( $last_season_value,"Final four (Finale)")['total'];
 
         $saison_value2="2025-2026";
         $args2=array(
@@ -1171,8 +1159,12 @@ $results=array();
             $equipe1 =get_field('equipe_1', $rencontre->ID)[0];
             $equipe2 =get_field('equipe_2', $rencontre->ID)[0];
         
-            $image1_url=(get_field('logo_miniature', $equipe1->ID))?get_field('logo_miniature', $equipe1->ID):get_the_post_thumbnail_url($equipe1->ID);
-            $image2_url=(get_field('logo_miniature', $equipe2->ID))?get_field('logo_miniature', $equipe2->ID):get_the_post_thumbnail_url($equipe2->ID);
+            $image_miniature1_url=(get_field('logo_miniature', $equipe1->ID))?get_field('logo_miniature', $equipe1->ID):get_the_post_thumbnail_url($equipe1->ID);
+            $image_miniature2_url=(get_field('logo_miniature', $equipe2->ID))?get_field('logo_miniature', $equipe2->ID):get_the_post_thumbnail_url($equipe2->ID);
+            $image_circle1_url=(get_field('logo_circle', $equipe1->ID))?get_field('logo_circle', $equipe1->ID):get_the_post_thumbnail_url($equipe1->ID);
+            $image_circle2_url=(get_field('logo_circle', $equipe2->ID))?get_field('logo_circle', $equipe2->ID):get_the_post_thumbnail_url($equipe2->ID);
+            $image_principal1_url=(get_field('logo_principal', $equipe1->ID))?get_field('logo_principal', $equipe1->ID):get_the_post_thumbnail_url($equipe1->ID);
+            $image_principal2_url=(get_field('logo_principal', $equipe2->ID))?get_field('logo_principal', $equipe2->ID):get_the_post_thumbnail_url($equipe2->ID);
         
             $abreviation1=(get_field('abreviation', $equipe1->ID))?get_field('abreviation', $equipe1->ID):$equipe1->post_title;
             $abreviation2=(get_field('abreviation', $equipe2->ID))?get_field('abreviation', $equipe2->ID):$equipe2->post_title;
@@ -1180,27 +1172,52 @@ $results=array();
             if($equipe_gagnante=='équipe 1'){
                 $winers[] = [            
                     'nom'   => $equipe1->post_title,
-                    'image' => $image1_url,           
+                    'image_miniature' => $image_miniature1_url,    
+                    'image_circle' => $image_circle1_url,  
+                    'image_principal' => $image_principal1_url, 
+                    'abreviation_equipe'  => $abreviation1,      
                 ];
             }
             else if($equipe_gagnante=='équipe 2'){
                 $winers[] = [            
                     'nom'   => $equipe2->post_title,
-                    'image' => $image2_url,          
+                    'image_miniature' => $image_miniature2_url,   
+                    'image_circle' => $image_circle2_url, 
+                    'image_principal' => $image_principal2_url,    
+                    'abreviation_equipe'  => $abreviation2,        
                 ]; 
             }
             else{
                 $winers[] = [            
                     'nom'   => "Vainqueur QF $i",
-                    'image' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",          
+                    'image_miniature' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png", 
+                    'image_circle' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png", 
+                    'image_principal' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",   
+                    'abreviation_equipe'  => '',           
                 ];
             }
             $i+=1;
         endforeach;
 
         $response = array();
+
+        $ids = array(18852, 18855, 18854, 18853);
+
+        $class_rencontres11_ordered = array();
+
+        foreach ($ids as $wanted_id) {
+
+            foreach ($class_rencontres11 as $d) {
+
+                if (($d[0]['id'] ?? null) == $wanted_id) {
+
+                    $class_rencontres11_ordered[] = $d;
+                    break;
+                }
+            }
+        }
         
-        foreach ( $class_rencontres11 as $d ) {
+        foreach ( $class_rencontres11_ordered as $d ) {
             $fields = get_fields( $d[0]['id'] ?? null); // Handle potential undefined 'rencontre_id'
         
             $response[] = array(
@@ -1225,10 +1242,9 @@ $results=array();
                 'logo_circle_equipe_2' => $d[0]['logo_circle_2'] ?? "",
                 'logo_miniature_equipe_1' => $d[0]['logo_miniature_1'] ?? "",
                 'logo_miniature_equipe_2' => $d[0]['logo_miniature_2'] ?? "",
-                //'pts_e1' => $d[0]['pts_e1'] ?? 0,
-                //'pts_e2' => $d[0]['pts_e2'] ?? 0,
-                'pts_e1' => $d[0]['ncge1'] ?? 0,
-                'pts_e2' => $d[0]['ncge2'] ?? 0,
+                'pts_e1' => $d[0]['pts_e1'] ?? 0,
+                'pts_e2' => $d[0]['pts_e2'] ?? 0,
+               
                 'score_eq_1' => $d[0]['ncge1'] ?? 0,
                 'score_eq_2' => $d[0]['ncge2'] ?? 0,
                 'equipe_gagnante' => $d[0]['equipe_gagnante'] ?? '',
@@ -1290,14 +1306,14 @@ $results=array();
                     'duree_combat' =>  '',
                     'equipe_1' => $winers[0]['nom'],
                     'equipe_2' => $winers[3]['nom'],
-                    'abreviation_equipe_1' =>  "",
-                    'abreviation_equipe_2' =>  "",
-                    'logo_principal_equipe_1' => $winers[0]['image'],
-                    'logo_principal_equipe_2' => $winers[3]['image'],
-                    'logo_circle_equipe_1' => $winers[0]['image'],
-                    'logo_circle_equipe_2' => $winers[3]['image'],
-                    'logo_miniature_equipe_1' => $winers[0]['image'],
-                    'logo_miniature_equipe_2' => $winers[3]['image'],
+                    'abreviation_equipe_1' =>  $winers[0]['abreviation_equipe'],
+                    'abreviation_equipe_2' =>  $winers[3]['abreviation_equipe'],
+                    'logo_principal_equipe_1' => $winers[0]['image_principal'],
+                    'logo_principal_equipe_2' => $winers[3]['image_principal'],
+                    'logo_circle_equipe_1' => $winers[0]['image_circle'],
+                    'logo_circle_equipe_2' => $winers[3]['image_circle'],
+                    'logo_miniature_equipe_1' => $winers[0]['image_miniature'],
+                    'logo_miniature_equipe_2' => $winers[3]['image_miniature'],
                     'pts_e1' =>  0,
                     'pts_e2' =>  0,
                     'score_eq_1' =>  0,
@@ -1320,14 +1336,14 @@ $results=array();
                     'duree_combat' =>  '',
                     'equipe_1' => $winers[1]['nom'],
                     'equipe_2' => $winers[2]['nom'],
-                    'abreviation_equipe_1' =>  "",
-                    'abreviation_equipe_2' =>  "",
-                   'logo_principal_equipe_1' => $winers[1]['image'],
-                    'logo_principal_equipe_2' => $winers[2]['image'],
-                    'logo_circle_equipe_1' => $winers[1]['image'],
-                    'logo_circle_equipe_2' => $winers[2]['image'],
-                    'logo_miniature_equipe_1' => $winers[1]['image'],
-                    'logo_miniature_equipe_2' => $winers[2]['image'],
+                    'abreviation_equipe_1' =>  $winers[1]['abreviation_equipe'],
+                    'abreviation_equipe_2' =>  $winers[2]['abreviation_equipe'],
+                   'logo_principal_equipe_1' => $winers[1]['image_principal'],
+                    'logo_principal_equipe_2' => $winers[2]['image_principal'],
+                    'logo_circle_equipe_1' => $winers[1]['image_circle'],
+                    'logo_circle_equipe_2' => $winers[2]['image_circle'],
+                    'logo_miniature_equipe_1' => $winers[1]['image_miniature'],
+                    'logo_miniature_equipe_2' => $winers[2]['image_miniature'],
                     'pts_e1' =>  0,
                     'pts_e2' =>  0,
                     'score_eq_1' =>  0,
@@ -1375,28 +1391,99 @@ $results=array();
                 );
             }
         }else{
+            $saison_value2="2025-2026";
+            $args2=array(
+                'post_type'=> 'rencontre',
+                'posts_per_page' => -1,
+                'meta_query'     => 
+                array(  
+                    'relation' => 'and',   
+                    array(      
+                        'key'        => 'niveau',      
+                        'compare'    => 'LIKE',      
+                        'value'      => 'Demi'
+                        ),
+                    array(
+                        'key'        => 'saisons',
+                        'compare'    => 'LIKE',
+                        'value'      => $saison_value2
+                    ),
+                ),		
+                'orderby' => 'post_title',
+                'order' => 'ASC',  
+            );
+            $rencontres2=get_posts($args2);
+            $semi_winers = []; 
+            $i=1;
+            foreach ($rencontres2 as $rencontre):
+                $combat=get_field('les_combat', $rencontre->ID)[0]; 
+                $equipe1 =get_field('equipe_1', $rencontre->ID)[0];
+                $equipe2 =get_field('equipe_2', $rencontre->ID)[0];
+            
+                $image_miniature1_url=(get_field('logo_miniature', $equipe1->ID))?get_field('logo_miniature', $equipe1->ID):get_the_post_thumbnail_url($equipe1->ID);
+                $image_miniature2_url=(get_field('logo_miniature', $equipe2->ID))?get_field('logo_miniature', $equipe2->ID):get_the_post_thumbnail_url($equipe2->ID);
+                $image_circle1_url=(get_field('logo_circle', $equipe1->ID))?get_field('logo_circle', $equipe1->ID):get_the_post_thumbnail_url($equipe1->ID);
+                $image_circle2_url=(get_field('logo_circle', $equipe2->ID))?get_field('logo_circle', $equipe2->ID):get_the_post_thumbnail_url($equipe2->ID);
+                $image_principal1_url=(get_field('logo_principal', $equipe1->ID))?get_field('logo_principal', $equipe1->ID):get_the_post_thumbnail_url($equipe1->ID);
+                $image_principal2_url=(get_field('logo_principal', $equipe2->ID))?get_field('logo_principal', $equipe2->ID):get_the_post_thumbnail_url($equipe2->ID);
+            
+                $abreviation1=(get_field('abreviation', $equipe1->ID))?get_field('abreviation', $equipe1->ID):$equipe1->post_title;
+                $abreviation2=(get_field('abreviation', $equipe2->ID))?get_field('abreviation', $equipe2->ID):$equipe2->post_title;
+                $equipe_gagnante =  $combat['equipe_gagnante'];
+                if($equipe_gagnante=='équipe 1'){
+                    $semi_winers[] = [            
+                        'nom'   => $equipe1->post_title,
+                        'image_miniature' => $image_miniature1_url,    
+                        'image_circle' => $image_circle1_url,  
+                        'image_principal' => $image_principal1_url, 
+                        'abreviation_equipe'  => $abreviation1,      
+                    ];
+                }
+                else if($equipe_gagnante=='équipe 2'){
+                    $semi_winers[] = [            
+                        'nom'   => $equipe2->post_title,
+                        'image_miniature' => $image_miniature2_url,   
+                        'image_circle' => $image_circle2_url, 
+                        'image_principal' => $image_principal2_url,    
+                        'abreviation_equipe'  => $abreviation2,        
+                    ]; 
+                }
+                else{
+                    $semi_winers[] = [            
+                        'nom'   => "Vainqueur DF $i",
+                        'image_miniature' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png", 
+                        'image_circle' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png", 
+                        'image_principal' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",   
+                        'abreviation_equipe'  => '',           
+                    ];
+                }
+                $i+=1;
+            endforeach;
+
+
             $response[] = array(
                 'id' => 5523,
                 'title' => 'FINAL 4 (FINALE)',
-                'lieu_rencontre' =>  '',
-                'date_de_debut' => "",
+                'lieu_rencontre' =>  'Dojo de Paris (75)',
+                'date_de_debut' => "16/05/2026 19:00 pm",
                 'date_timestamp' => 1736296400,
-                'full_date_de_debut' => "",
-                'heure_de_debut' => '',
+                'full_date_de_debut' => "samedi 16 mai 2026",
+                'heure_de_debut' => '19:00',
+                
                 'statut' => "à venir",
                 'phase' => "Finale",
                 'journee' => "Finale",
                 'duree_combat' =>  '',
-                'equipe_1' => "Vainqueur DF 1",
-                'equipe_2' => "Vainqueur DF 2",
-                'abreviation_equipe_1' =>  "",
-                'abreviation_equipe_2' =>  "",
-               'logo_principal_equipe_1' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",
-                'logo_principal_equipe_2' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",
-                'logo_circle_equipe_1' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",
-                'logo_circle_equipe_2' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",
-                'logo_miniature_equipe_1' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",
-                'logo_miniature_equipe_2' => "https://judoproleague.com/wp-content/uploads/2024/08/unknown.png",
+                'equipe_1' => $semi_winers[0]['nom'],
+                'equipe_2' => $semi_winers[1]['nom'],
+                'abreviation_equipe_1' =>  $semi_winers[0]['abreviation_equipe'],
+                'abreviation_equipe_2' =>  $semi_winers[1]['abreviation_equipe'],
+                'logo_principal_equipe_1' => $semi_winers[0]['image_principal'],
+                'logo_principal_equipe_2' => $semi_winers[1]['image_principal'],
+                'logo_circle_equipe_1' => $semi_winers[0]['image_circle'],
+                'logo_circle_equipe_2' => $semi_winers[1]['image_circle'],
+                'logo_miniature_equipe_1' => $semi_winers[0]['image_miniature'],
+                'logo_miniature_equipe_2' => $semi_winers[1]['image_miniature'],
                 'pts_e1' =>  0,
                 'pts_e2' =>  0,
                 'score_eq_1' =>  0,

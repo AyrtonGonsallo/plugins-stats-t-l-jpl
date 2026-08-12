@@ -312,6 +312,34 @@ $results=array();
 
 					}
 
+					$val_shiddo_1 = $match['valeurs_shidos_judoka_1']['value'];
+					$val_shiddo_2 = $match['valeurs_shidos_judoka_2']['value'];
+
+					if (is_numeric($val_shiddo_1)) {
+
+						$results["total"][$equipe1->post_title][0]["shidos_marqués"]+= (int)$val_shiddo_1;
+
+						$results["total"][$equipe2->post_title][0]["shidos_concédés"]+= (int)$val_shiddo_1;
+
+					}else{
+						$results["total"][$equipe1->post_title][0]["shidos_marqués"]+= 1;
+
+						$results["total"][$equipe2->post_title][0]["shidos_concédés"]+= 1;
+					}
+					
+
+					if (is_numeric($val_shiddo_2)) {
+
+						$results["total"][$equipe2->post_title][0]["shidos_marqués"]+= (int)$val_shiddo_2;
+
+						$results["total"][$equipe1->post_title][0]["shidos_concédés"]+= (int)$val_shiddo_2;
+
+					}else{
+						$results["total"][$equipe2->post_title][0]["shidos_marqués"]+= 1;
+
+						$results["total"][$equipe1->post_title][0]["shidos_concédés"]+= 1;
+					}
+
 					$i++;
 
 					$results["total"][$equipe1->post_title][0]["niveau"]=$niveau;
@@ -468,6 +496,8 @@ $sorted_result_ids=array();
                 'ippons_concédés' => $d[0]['ippons_concédés'] ?? 0,
                 'wazaris_marqués' => $d[0]['wazaris_marqués'] ?? 0,
                 'wazaris_concédés' => $d[0]['wazaris_concédés'] ?? 0,
+				'shidos_marqués' => $d[0]['shidos_marqués'] ?? 0,
+                'shidos_concédés' => $d[0]['shidos_concédés'] ?? 0,
                 'points_marqués' => $d[0]['points_marqués'] ?? 0,
 				'matchs_v' => $d[0]['matchs_v'] ?? 0,
                 'combats_individuels' => $d[0]['combats_individuels'] ?? '',
@@ -505,7 +535,7 @@ $sorted_result_ids=array();
             $response[] = array(
                 'id_ffjda' => $d[0]['id_ffjda'] ?? null,
                 'titre' => $d[0]['titre'] ?? '',
-				'phase'=>'journée 4',
+				'phase'=>'final 4',
                 'abreviation' => $d[0]['abreviation'] ?? '',
                 'logo_miniature' => $d[0]['logo_miniature'] ?? '',
                 'logo_circle' => $d[0]['logo_circle'] ?? '',

@@ -82,3 +82,5 @@ function handle_export_galerie_zip() {
 
     exit;
 }
+
+

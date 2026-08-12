@@ -42,19 +42,23 @@
                 )
             );
 
+            //les rencontres
+            $rencontres = get_posts(array('post_type' => 'rencontre', 'numberposts' => -1)); 
+
 
             $saisons = array(
                 '2023-2024' => '2023-2024',
                 '2024-2025' => '2024-2025',
                 '2025-2026' => '2025-2026',
+                '2026-2027' => '2026-2027',
             );
             ?>
             <div class="image-flx-forms">
                 <!-- Ajouter Select2 CSS -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
-<!-- Ajouter Select2 JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+            <!-- Ajouter Select2 JS -->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
             <div>
                 <!-- Champ pour sélectionner Judoka 1 -->
@@ -82,8 +86,22 @@
                 </select>
             </div>
             <div>
+                <!-- Champ pour sélectionner une rencontre -->
+                <label for="related_rencontre">Sélectionner une rencontre :</label>
+                <select name="related_rencontre" id="related_rencontre" class="select3">
+                    <option value="">Choisir une rencontre</option>
+                    <?php foreach ($rencontres as $rencontre) :
+                        $saison = get_field( 'saisons',$rencontre->ID ); ?>
+                        <option value="<?php echo esc_attr($rencontre->ID); ?>" >
+                            <?php echo esc_html($rencontre->ID.' - '.$saison.' - '.$rencontre->post_title); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            
+            <div>
                 <label for="saison">Sélectionner la Saison :</label>
-                <select name="saison" id="saison">
+                <select name="saison" id="saison" >
                     <option value="">Choisir une saison</option>
                     <?php foreach ($saisons as $key => $value): ?>
                         <option <?echo ($value=='2025-2026')?'selected':'';?> value="<?php echo esc_attr($key); ?>"><?php echo esc_html($value); ?></option>
@@ -132,6 +150,7 @@
                 $image_url = wp_get_attachment_url($image->ID);
                 $img_j1_id=get_post_meta($image->ID, 'related_judoka_1', true);
                 $img_j2_id=get_post_meta($image->ID, 'related_judoka_2', true);
+                $related_rencontre=get_post_meta($image->ID, 'related_rencontre', true);
                 $img_saison=get_post_meta($image->ID, 'related_saison', true);
                 echo '<div class="image-container">';
                     echo '<label>';
@@ -145,6 +164,9 @@
                         if($img_j2_id){
                             echo '<div>Judoka 2 : '.esc_html(get_the_title($img_j2_id)).'</div>'; // Récupère la valeur liée à 'related_judoka_2'
                         }
+                        if($related_rencontre){
+                            echo '<div>Rencontre : '.esc_html(get_the_title($related_rencontre)).'</div>'; // Récupère la valeur liée à 'related_rencontre'
+                        }
                         if($img_saison){
                             echo '<div>Saison : '.esc_html(($img_saison)).'</div>'; // Récupère la valeur liée à 'related_saison'
                         }
@@ -157,6 +179,7 @@
                 $image_url = wp_get_attachment_url($image["ID"]);
                 $img_j1_id=get_post_meta($image["ID"], 'related_judoka_1', true);
                 $img_j2_id=get_post_meta($image["ID"], 'related_judoka_2', true);
+                $related_rencontre=get_post_meta($image["ID"], 'related_rencontre', true);
                 $img_saison=get_post_meta($image["ID"], 'related_saison', true);
                 echo '<div class="image-container">';
                     echo '<label>';
@@ -169,6 +192,9 @@
                     }
                     if($img_j2_id){
                         echo '<div>Judoka 2 : '.esc_html(get_the_title($img_j2_id)).'</div>'; // Récupère la valeur liée à 'related_judoka_2'
+                    }
+                     if($related_rencontre){
+                        echo '<div>Rencontre : '.esc_html(get_the_title($related_rencontre)).'</div>'; // Récupère la valeur liée à 'related_rencontre'
                     }
                     if($img_saison){
                         echo '<div>Saison : '.esc_html(($img_saison)).'</div>'; // Récupère la valeur liée à 'related_saison'

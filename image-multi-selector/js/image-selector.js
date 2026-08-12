@@ -20,6 +20,8 @@ jQuery(document).ready(function($) {
         var judoka1 = $('#judoka1').val();
         var judoka2 = $('#judoka2').val();
         var saison = $('#saison').val();
+        var related_rencontre = $('#related_rencontre').val();
+        
 
         // Vérifier qu'il y a des images sélectionnées
         if (selectedImages.length === 0) {
@@ -31,7 +33,8 @@ jQuery(document).ready(function($) {
             images: selectedImages,
             judoka1: judoka1,
             judoka2: judoka2,
-            saison: saison
+            saison: saison,
+            related_rencontre: related_rencontre
         });
         // Envoyer les données via AJAX
         $.ajax({
@@ -42,7 +45,8 @@ jQuery(document).ready(function($) {
                 images: selectedImages,
                 judoka1: judoka1,
                 judoka2: judoka2,
-                saison: saison
+                saison: saison,
+                related_rencontre: related_rencontre
             },
             success: function(response) {
                 if (response.success) {
@@ -97,6 +101,11 @@ $('#deselect-all').on('change', function() {
 
 $('.select2').select2({
     placeholder: "Sélectionner un judoka",
+    allowClear: true
+});
+
+$('.select3').select2({
+    placeholder: "Sélectionner une rencontre",
     allowClear: true
 });
     

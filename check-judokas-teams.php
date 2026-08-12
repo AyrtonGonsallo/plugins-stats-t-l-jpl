@@ -28,11 +28,11 @@ function start_scripts() {
                     'compare' => 'LIKE',
                     'value'   => "2025-2026",
                 ),
-                array(
-                    'key'     => 'Journée',
-                    'compare' => 'LIKE',
-                    'value'   => 'Journée 4',
-                ),
+                array(      
+				'key'        => 'niveau',      
+				'compare'    => '=',      
+				'value'      => 'Quart de finale'
+				),
             ),
     );
     $rencontres = get_posts($args);
