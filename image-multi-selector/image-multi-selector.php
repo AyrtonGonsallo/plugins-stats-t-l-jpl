@@ -15,6 +15,14 @@ add_action('admin_enqueue_scripts', 'ims_enqueue_scripts');
 
 // Create a menu item
 function ims_create_menu() {
+     $user = wp_get_current_user();
+        if (
+        !in_array('administrator', $user->roles, true) &&
+        !in_array('photographe_jpl', $user->roles, true)
+    ) {
+        return;
+    }
+
     add_menu_page('Multiple images tagger', 'Multiple images tagger', 'upload_files', 'image-multi-selector', 'ims_render_selector_page','',50);
 }
 add_action('admin_menu', 'ims_create_menu');

@@ -52,7 +52,7 @@ class JPL_Paris {
                 ],
                 [
                     'key'     => 'saisons',
-                    'value'   => '2025-2026',
+                    'value'   => '2026-2027',
                     'compare' => 'LIKE'
                 ]
             ]
@@ -187,7 +187,14 @@ class JPL_Paris {
             'post_status'    => 'publish',
             'orderby'        => 'ID',
             'order'          => 'ASC',
-            'offset'         => $offset
+            'offset'         => $offset,
+
+            'date_query' => [
+                [
+                    'after'     => '2026-07-23',
+                    'inclusive' => false,
+                ],
+            ],
         ]);
 
         if (!$series) {
@@ -439,7 +446,14 @@ public static function cron_check_multiple_user_series() {
         'post_status'    => 'publish',
         'orderby'        => 'ID',
         'order'          => 'ASC',
-        'offset'         => $offset
+        'offset'         => $offset,
+
+        'date_query' => [
+            [
+                'after'     => '2026-07-23',
+                'inclusive' => false,
+            ],
+        ],
     ]);
 
     if (!$series) {
@@ -1104,7 +1118,7 @@ public static function cron_update_classement() {
                     ],
                     [
                         'key'     => 'saisons',
-                        'value'   => '2025-2026',
+                        'value'   => '2026-2027',
                         'compare' => 'LIKE'
                     ]
                 ]

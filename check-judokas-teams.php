@@ -26,12 +26,12 @@ function start_scripts() {
                 array(
                     'key'     => 'saisons',
                     'compare' => 'LIKE',
-                    'value'   => "2025-2026",
+                    'value'   => "2026-2027",
                 ),
                 array(      
 				'key'        => 'niveau',      
 				'compare'    => '=',      
-				'value'      => 'Quart de finale'
+				'value'      => 'Phase de poules'
 				),
             ),
     );

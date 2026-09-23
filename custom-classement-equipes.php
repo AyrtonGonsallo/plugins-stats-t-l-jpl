@@ -119,6 +119,7 @@ $results=array();
 					"id_ffjda" => get_field('id_ffjda', $equipe1->ID),
 					"abreviation" => get_field('abreviation', $equipe1->ID),
 					"logo_principal" => get_field('logo_principal', $equipe1->ID),
+					"mise_en_avant" => get_the_post_thumbnail_url($equipe1->ID),
 					"logo_circle" => get_field('logo_circle', $equipe1->ID),
 					"logo_miniature" => get_field('logo_miniature', $equipe1->ID),
 					"niveau" =>get_field("niveau",$rencontre->ID),
@@ -134,6 +135,7 @@ $results=array();
 					"abreviation" => get_field('abreviation', $equipe2->ID),
 					"logo_principal" => get_field('logo_principal', $equipe2->ID),
 					"logo_circle" => get_field('logo_circle', $equipe2->ID),
+					"mise_en_avant" => get_the_post_thumbnail_url($equipe2->ID),
 					"logo_miniature" => get_field('logo_miniature', $equipe2->ID),
 					"niveau" =>get_field("niveau",$rencontre->ID),
 					"combats_individuels" => [], // Initialize as an empty array
@@ -469,7 +471,7 @@ $sorted_result_ids=array();
 
 
     function get_classement_equipes( $data ) {
-        $last_season_value = "2025-2026";
+        $last_season_value = "2026-2027";
         
         $class_classement_equipes = get_classement_equipes_plugin( $last_season_value,"classement" )['total'];
         $response = array();
@@ -480,8 +482,9 @@ $sorted_result_ids=array();
             $response[] = array(
                 'id_ffjda' => $d[0]['id_ffjda'] ?? null,
                 'titre' => $d[0]['titre'] ?? '',
-				'phase'=>'journée 4',
+				'phase'=>'journée 1',
                 'abreviation' => $d[0]['abreviation'] ?? '',
+				'mise_en_avant' => $d[0]['mise_en_avant'] ?? '',
                 'logo_miniature' => $d[0]['logo_miniature'] ?? '',
                 'logo_circle' => $d[0]['logo_circle'] ?? '',
                 'logo_principal' => $d[0]['logo_principal'] ?? '',
@@ -523,7 +526,7 @@ $sorted_result_ids=array();
 
 
 	function get_classement_equipes_offensives( $data ) {
-        $last_season_value = "2025-2026";
+        $last_season_value = "2026-2027";
         
         $class_classement_equipes = get_classement_equipes_plugin( $last_season_value,"offensive" )['total'];
 		//var_dump($class_classement_equipes);exit(-1);

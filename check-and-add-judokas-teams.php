@@ -65,7 +65,7 @@ function start_check_and_update_scripts() {
 
     unlink($tmp_file); // Nettoyer le fichier temporaire
 
-    $saison = "2025-2026";
+    $saison = "2026-2027";
 
     // Pagination
     $per_page = 200;
@@ -101,6 +101,7 @@ function start_check_and_update_scripts() {
         $id_ffjda        = trim($row['E']);
         $categorie       = trim($row['F']);
         $nom_equipe_excel = trim($row['G']);
+        $sexe = trim($row['H']);
         $nom_trouve             = "";
         $prenom_trouve         = "";
 
@@ -161,6 +162,10 @@ function start_check_and_update_scripts() {
                 if (!empty($id_ffjda)) {
                     update_field('id_ffjda', $id_ffjda, $judoka_id);
                 }
+                if (!empty($sexe)) {
+                    update_field('sexe', $sexe, $judoka_id);
+                    $statut .= "<br>✅ Sexe : ".$sexe;
+                }
                 if (!empty($categorie)) {
                     $categorie_clean = str_ireplace('kg', '', $categorie);
                     $categorie_clean = trim($categorie_clean); // nettoyer les espaces
@@ -186,6 +191,10 @@ function start_check_and_update_scripts() {
             $cat_judoka = get_field('categorie_de_poids', $judoka_id);
             update_field('categorie_dage', 'Senior', $judoka_id);
             update_field('field_64c121fc191a5', 'Senior', $judoka_id);
+            if (!empty($sexe)) {
+                update_field('sexe', $sexe, $judoka_id);
+                $statut .= "<br>✅ Sexe : ".$sexe;
+            }
             $statut .= "<br>✅ Catégorie d'âge mise à jour";
             if (! $cat_judoka) {
                 $statut .= "<br>⚠️ Catégorie absente sur le site";
@@ -257,7 +266,7 @@ function start_check_and_update_scripts() {
                         }
                     }
                     if ($exists && $judoka_id) {
-                        $statut .= "<br> ℹ️ Déjà présent";
+                        $statut .= "<br> ℹ️ Déjà présent ".$saison;
                         
                             
                         

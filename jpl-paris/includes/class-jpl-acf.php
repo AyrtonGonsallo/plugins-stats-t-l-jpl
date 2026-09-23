@@ -151,6 +151,36 @@ class JPL_ACF {
                     ],
                 ],
             ]);
+
+
+            acf_add_local_field_group([
+                'key' => 'group_admin_equipe_jpl',
+                'title' => 'Profil Admin Equipes',
+                'fields' => [
+                    
+                    // Nouveau champ : lien vers un post_type "equipes"
+                    [
+                        'key' => 'field_equipe',
+                        'label' => 'Équipe',
+                        'name' => 'equipe',
+                        'type' => 'post_object',
+                        'post_type' => ['equipes'], // ton CPT
+                        'return_format' => 'id', // ou 'object' si tu veux l'objet complet
+                        'ui' => 1, // active la sélection via interface
+                        'allow_null' => 1,
+                    ],
+                ],
+                'location' => [
+                    [
+                        [
+                            'param' => 'user_role',
+                            'operator' => '==',
+                            'value' => 'admin_equipe_jpl',
+                        ],
+                    ],
+                ],
+            ]);
+
         }
 
        

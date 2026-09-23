@@ -11,6 +11,37 @@ class JPL_Roles {
             ]
         );
 
+       //remove_role('admin_equipe_jpl');
+
+        add_role(
+            'admin_equipe_jpl',
+            'admin_equipe JPL',
+            [
+                'read' => true,
+                'upload_files' => true,
+
+                // Équipes
+                'edit_equipe' => true,
+                'edit_equipes' => true,
+                'edit_published_equipes' => true,
+                'publish_equipes' => false,
+                'delete_equipe' => false,
+                'delete_equipes' => false,
+                'read_private_equipes' => true,
+                'edit_others_equipes' => true,
+
+                // Judokas
+                'edit_judoka' => true,
+                'edit_judokas' => true,
+                'edit_published_judokas' => true,
+                'publish_judokas' => false,
+                'delete_judoka' => false,
+                'delete_judokas' => false,
+                'read_private_judokas' => true,
+                'edit_others_judokas' => true,
+            ]
+        );
+
         add_role(
             'photographe_jpl',
             'Photographe JPL',
